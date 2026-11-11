@@ -1,21 +1,22 @@
-# CHECKPOINT 49 — read me first, then TASKS.md
+# CHECKPOINT 61 — read me first, then TASKS.md
 
-**Written:** 2026-11-11T22:14:08Z · **tests:** all 1 fast checks green (gradle suite: see ship.sh)
-**Branch:** `ccr-726a5950-fnv7m9` · **builds on:** `2c885b4` (this checkpoint is the commit after it)
+**Written:** 2026-11-11T22:24:44Z · **tests:** all 1 fast checks green (gradle suite: see ship.sh)
+**Branch:** `ccr-726a5950-fnv7m9` · **builds on:** `33dbb57` (this checkpoint is the commit after it)
 
 ## Just done
-Release v0.1.0 PUBLISHED by GitHub Actions (run 43109636536 green: check 16 s, build 69 s, Publish the Release succeeded). Verified on GitHub: https://github.com/tjshea90/Optimizer/releases/tag/v0.1.0 has Optimizer-v0.1.0.apk (28154 bytes, same size as the local build) and .sha256, not draft, not prerelease. Recorded in BUILDLOG.md; TASKS REL-1 ticked.
+Research done (R2, G2 ticked): both repo surveys back; key claims re-read in the source. Wrote research/BOUNDARIES.md (what the Launcher/Browser/ROM own; rules: never kill anything, no resident process, no accessibility service, no second helper, all system changes = owner-run PC adb steps, reversible, measured) and rewrote research/FEASIBILITY.md with evidence. Findings: MediaTek DuraSpeed is ON on the tablet; the Launcher already self-compiles (-m speed), clears Recents and owns the animation scales + battery saver; the Browser exits its process tree when idle; the Launcher's on-device helper dies in 15-27 min and TCP is EPERM. TASKS: proposed plan P0-P5, P0 claimed. Started P0 code: NEW files app/src/main/kotlin/com/tj/optimizer/{Parsers,StorageBench,Format}.kt are written but NOT yet compiled, wired or tested.
 
 ## Do this next
-R2/G2 in progress: two read-only research agents (Launcher boundary map; Browser memory/process facts) were launched at ~22:19Z and report back by notification - when they do, spot-check the 'must not touch' items with grep in /home/user/tjshea90/launcher (refresh with git fetch --depth=1 origin HEAD) and write research/BOUNDARIES.md; update research/FEASIBILITY.md with the owner's answers (adb cable YES, accessibility OK if it breaks nothing); then draft the feature plan (G3/G4: PC-side adb toolkit with undo, baseline measurement) for the owner to approve. Then tell the owner the release link.
+P0 (v0.2.0 baseline): 1) extend DeviceFacts (uptimeMs, cpu, swaps, vm, thermal, dataTotal/Free, animScales, appsTotal/System, selfPssKb) with defaults so old tests compile; 2) SystemReader fills them (try/catch per file; PowerManager.currentThermalStatus; StatFs; Settings.Global.getFloat for the 3 scales READ-ONLY; Debug.getMemoryInfo for own PSS); 3) ReportText.build(facts, bench) prints them; 4) MainActivity: third button 'Storage speed test' (Thread, dropCache = Os.posix_fadvise DONTNEED, file in cacheDir, skip if <256 MB free, always deleted); 5) unit tests for Parsers/Format/StorageBench/ReportText; 6) versionCode 2 / versionName 0.2.0; 7) ./gradlew :app:testDebugUnitTest :app:lintRelease :app:assembleRelease + bash tools/verify-apk.sh; 8) ckpt; then P1 (PC intake kit) while deciding whether to ship v0.2.0 via ship.sh.
 
 *(resuming? CLAUDE.md's "FIRST ACTION OF EVERY SESSION" says how; the briefing is tools/resume.sh. Do that first, or autosave may stay off all session.)*
 
 ## Uncommitted right now
-     M TASKS.md
+    (nothing — the tree is clean as of this checkpoint)
 
 ## Last ten checkpoints
 ```
+  74c47ad ckpt 49: Release v0.1.0 PUBLISHED by GitHub Actions (run 43109636536 green: check 16 s, 
   e928075 ckpt 47: Release v0.1.0 DISPATCHED on GitHub Actions: run 43109636536 (android.yml run_n
   1df73c8 ckpt 46: gated v0.1.0 (code 1) and pushed it: handoff self-test, unit tests and the vers
   a3ce2ec ckpt 45: Recorded the owner's answers (INBOX hook captured the message verbatim and push
@@ -24,3 +25,6 @@ R2/G2 in progress: two read-only research agents (Launcher boundary map; Browser
   3a22c7d ckpt 32: CI + docs done and the whole tooling self-test is green (63 passed, 0 failed). 
   9fa6a48 ckpt 20: Ported the Browser repo's save ladder into this single-app repo (tools/*.sh, sh
 ```
+
+(11 automatic checkpoint(s) since the last deliberate one — the
+session was still mid-step. `git diff` against it shows what changed.)
