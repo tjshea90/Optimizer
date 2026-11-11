@@ -66,7 +66,8 @@ Do this next; stand down if another session's real work is under 60 minutes old"
 
 ## Commands
 - `./gradlew :app:testDebugUnitTest` - the JVM unit tests (no emulator needed). `./gradlew :app:lintRelease` (NewApi matters: minSdk 29). `./gradlew :app:assembleRelease` then `bash tools/verify-apk.sh` - the release APK and its audit (local check only; GitHub makes the real one).
-- `bash tools/test_handoff.sh` - self-test of the save/release tooling (runs inside every `ckpt` and is the first CI gate). `bash tools/repomap.sh [word]` - a map of every source file with its first doc line; far cheaper than exploring with Glob/Grep/Read.
+- **Tablet data:** the owner runs `tools/adb/intake.bat` (or `.sh`) on their PC with the cable; it writes `optimizer-report.txt` (READ-ONLY survey, the command list is `tools/adb/intake-commands.txt`). When they send it: `bash tools/intake.sh <file>` (or `-` for pasted text) redacts it, saves `research/tablet/<date>/` and writes `FACTS.md`; read `research/tablet/LATEST.md` (red flags first), then `git add research/tablet` and `ckpt`. The in-app equivalent is the v0.2.0 "Copy report" text.
+- `bash tools/test_handoff.sh` - self-test of the save/release tooling and the survey kit (`tools/test_intake.sh`); runs inside every `ckpt` and is the first CI gate. `bash tools/repomap.sh [word]` - a map of every source file with its first doc line; far cheaper than exploring with Glob/Grep/Read.
 
 ## Architecture map (rationale: `docs/ARCHITECTURE.md`)
 - `app/` is the only module, package `com.tj.optimizer`: `MainActivity` (framework Views built in code), `MemInfo` (pure /proc/meminfo parser + size formatting), `ReportText` (pure report builder), `SystemReader` (the thin framework glue).

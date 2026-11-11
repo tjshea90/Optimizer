@@ -34,6 +34,11 @@ The single entry point for a new Claude session or account. After this, in order
 5. Green + the Release shows its APK (`get_release_by_tag`): `bash tools/record-release.sh <tag> "note"`. Then give the owner the Release link as plain tappable text on its own line.
 6. NEVER ship a tag twice (check BUILDLOG.md and the Releases first). Never publish a Release the owner has not asked for.
 
+## 2b. Real tablet data (the owner sends it; nothing else shows what the tablet is doing)
+- Owner runs `tools/adb/intake.bat` (Windows) or `intake.sh` with the USB cable: a READ-ONLY survey into `optimizer-report.txt` (guide for the owner: `tools/adb/README.md`). You run `bash tools/intake.sh <file>` (or `-` for pasted text): it REDACTS (serials, MAC/IP, e-mail, Wi-Fi names, long digit runs),
+  refuses the whole file if a credential-shaped string is left, saves `research/tablet/<date>/{optimizer-report.txt,FACTS.md,INTAKE.txt}` and `research/tablet/LATEST.md`. Read LATEST.md (red flags first), `git add research/tablet`, `ckpt`, then decide with the numbers (TASKS P2).
+- The app's own v0.2.0 "Copy report" text and its "Storage speed test" are the no-cable equivalent for memory/storage; the survey adds per-process memory, compile state, thrash counters, heat and the ROM's background manager.
+
 ## 3. Test system (what runs where)
 - `app/src/test` JVM tests (pure logic: `MemInfoTest`), Android Lint on the release variant (`NewApi` guards minSdk 29), `tools/test_handoff.sh` (about 60 checks of the save/release system with a throwaway repo and a fake remote).
   The workflow repeats all of it on GitHub. There is no emulator in the cloud sandbox (no KVM) and no instrumented test yet: say honestly what was not run on the real tablet.
