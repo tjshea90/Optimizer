@@ -37,7 +37,7 @@ done
 
 # A workflow file that does not parse silently LOSES its triggers (GitHub then says "Workflow does not have 'workflow_dispatch' trigger"): a colon inside a step name does it.
 if python3 -I -c "import yaml" >/dev/null 2>&1; then
-  for W in "$D"/.github/workflows/*.yml; do
+  for W in "$D"/.github/workflows/*.yml "$D"/.github/actions/*/action.yml; do
     [ -f "$W" ] || continue
     if python3 -I - "$W" <<'PY'
 import sys, yaml
@@ -46,18 +46,20 @@ on = d.get(True, d.get('on')) or {}
 name = sys.argv[1].rsplit('/', 1)[-1]
 if name == 'android.yml':
     wd = on.get('workflow_dispatch') if isinstance(on, dict) else None
-    if not isinstance(wd, dict) or 'app' not in (wd.get('inputs') or {}) or 'full_build' not in (wd.get('inputs') or {}):
+    inputs = (wd or {}).get('inputs') or {}
+    if not isinstance(wd, dict) or not all(k in inputs for k in ('full_build', 'publish', 'note')):
         sys.exit(1)
 sys.exit(0)
 PY
-    then ok; else bad "$(basename "$W") does not parse as YAML or lost its workflow_dispatch inputs (a colon inside a step name does that)"; fi
+    then ok; else bad "$(basename "$W") does not parse as YAML or lost its workflow_dispatch inputs full_build/publish/note (a colon inside a step name does that)"; fi
   done
 fi
-check "android.yml publishes with 'gh release create --target' (a tag PUSH from the sandbox is refused with 403)" 'grep -q "gh release create" "$D/.github/workflows/android.yml" && grep -q -e "--target" "$D/.github/workflows/android.yml"'
+check "publish-release.sh creates the Release with 'gh release create --target' (a tag PUSH from the sandbox is refused with 403)" 'grep -q "gh release create" "$D/.github/scripts/publish-release.sh" && grep -q -e "--target" "$D/.github/scripts/publish-release.sh"'
 check "android.yml can write the Release (permissions: contents: write)" 'grep -q "contents: write" "$D/.github/workflows/android.yml"'
+check "android.yml never commits or pushes (a workflow that pushed would retrigger autosave)" '! grep -E "^\s*(run:\s*)?git (push|commit)" "$D/.github/workflows/android.yml"'
 
 # ---------------------------------------------------------------- the repo's own wiring
-check "every tools/*.sh and ship.sh passes bash -n" 'for f in "$D"/tools/*.sh "$D"/ship.sh "$D"/bootstrap.sh; do bash -n "$f" || exit 1; done'
+check "every tools/*.sh, ship.sh, bootstrap.sh and .github script passes bash -n" 'for f in "$D"/tools/*.sh "$D"/ship.sh "$D"/bootstrap.sh "$D"/.github/scripts/*.sh; do bash -n "$f" || exit 1; done'
 check ".claude/settings.json is valid JSON and every hook command points at an existing tools/ script" 'python3 -I - "$D" <<PY
 import json, re, sys, os
 d = sys.argv[1]
@@ -72,23 +74,27 @@ for ev in s["hooks"].values():
 assert n >= 6, n
 PY'
 check "a PostToolUse hook with matcher * (every tool, MCP included) is registered in settings and template" 'python3 -c "import json,sys; [sys.exit(0 if any(e.get(\"matcher\")==\"*\" and \"posttool.sh\" in json.dumps(e) for e in json.load(open(p))[\"hooks\"][\"PostToolUse\"]) else 1) for p in sys.argv[1:]]" "$D/.claude/settings.json" "$D/tools/session-root-hooks.json"'
-check "the hook template is valid JSON with the Kestrel marker on every command" 'python3 -I -c "
+check "the hook template is valid JSON with the Optimizer marker on every command" 'python3 -I -c "
 import json,sys
 t=json.load(open(sys.argv[1]))
 cmds=[h[\"command\"] for ev in t[\"hooks\"].values() for e in ev for h in e[\"hooks\"]]
 assert cmds and all(\"optimizer-checkpoint-hooks\" in c for c in cmds)
 " "$D/tools/session-root-hooks.json"'
-check "the built-in extension's manifest version equals 1.0.<Kestrel G versionCode> (else an updated background.js never reaches existing installs)" 'bash "$D/tools/sync-ext-version.sh" --check'
 check "signing/CERT_SHA256 pins a 64-hex certificate" 'grep -Eq "^[0-9a-f]{64}$" "$D/signing/CERT_SHA256"'
+# the pin must be the certificate of the keystore that actually signs (a mismatch makes the workflow gate fail only after minutes were spent)
+if command -v keytool >/dev/null 2>&1 && [ -f "$D/signing/dev/optimizer-dev.jks" ]; then
+  check "signing/CERT_SHA256 equals the certificate of signing/dev/optimizer-dev.jks" '[ "$(keytool -list -v -keystore "$D/signing/dev/optimizer-dev.jks" -storepass optimizer-dev -alias optimizer-dev 2>/dev/null | sed -n "s/.*SHA256: *//p" | head -1 | tr -d ":" | tr "A-F" "a-f")" = "$(tr -d " \r\n" < "$D/signing/CERT_SHA256")" ]'
+fi
 check "tools/MIRROR_MAIN is on or off" 'grep -Eq "^(on|off)$" "$D/tools/MIRROR_MAIN"'
 check "HANDOFF.md, BRIEF.md, TASKS.md, BUILDLOG.md and CLAUDE.md exist" '[ -f "$D/HANDOFF.md" ] && [ -f "$D/BRIEF.md" ] && [ -f "$D/TASKS.md" ] && [ -f "$D/BUILDLOG.md" ] && [ -f "$D/CLAUDE.md" ]'
-check "both apps are readable through appinfo.sh (version, tag, asset)" '[ -n "$(bash "$D/tools/appinfo.sh" web tag)" ] && [ -n "$(bash "$D/tools/appinfo.sh" gecko asset)" ] && [ "$(bash "$D/tools/appinfo.sh" of-tag kestrel-g-v1.0)" = gecko ] && [ "$(bash "$D/tools/appinfo.sh" of-tag kestrel-v1.0)" = web ] && ! bash "$D/tools/appinfo.sh" of-tag v1.0'
-check "BUILDLOG.md lines have the format the gates read (| tag | app | code N | time | note)" '! grep -E "^\| " "$D/BUILDLOG.md" | grep -vqE "^\| kestrel(-g)?-v[^ |]+ \| (web|gecko) \| code [0-9]+ \| "'
+check "the app is readable through appinfo.sh (version, tag, asset) and only v<digit> tags belong to it" '[ -n "$(bash "$D/tools/appinfo.sh" vcode)" ] && [ -n "$(bash "$D/tools/appinfo.sh" tag)" ] && [ -n "$(bash "$D/tools/appinfo.sh" asset)" ] && [ "$(bash "$D/tools/appinfo.sh" of-tag v1.0)" = optimizer ] && ! bash "$D/tools/appinfo.sh" of-tag release-1 && ! bash "$D/tools/appinfo.sh" of-tag kestrel-v1.0'
+check "applicationId in app/build.gradle.kts is the package appinfo.sh and verify-apk.sh expect" 'grep -q "applicationId = \"$(bash "$D/tools/appinfo.sh" package)\"" "$D/app/build.gradle.kts"'
+check "BUILDLOG.md lines have the format the gates read (| tag | code N | time | note)" '! grep -E "^\| " "$D/BUILDLOG.md" | grep -vqE "^\| v[0-9][^ |]* \| code [0-9]+ \| "'
 
 # ---------------------------------------------------------------- fixture repo + fake remote
 git init -q --bare "$T/remote.git"
 git clone -q "$T/remote.git" "$T/work" 2>/dev/null
-mkdir -p "$T/work/tools" "$T/work/app" "$T/work/geckoapp" "$T/work/signing"
+mkdir -p "$T/work/tools" "$T/work/app" "$T/work/signing"
 cp "$D"/tools/*.sh "$D"/tools/session-root-hooks.json "$D"/tools/MIRROR_MAIN "$T/work/tools/" 2>/dev/null
 echo off > "$T/work/tools/MIRROR_MAIN"
 cp "$D"/ship.sh "$D"/signing/CERT_SHA256 "$T/work/" 2>/dev/null
@@ -98,7 +104,6 @@ cd "$T/work" || exit 1
 rm -f tools/test_handoff.sh   # the fixture must not recurse into this test via ckpt.sh
 git config user.email t@t; git config user.name t
 printf '        versionCode = 1\n        versionName = "0.1.0"\n' > app/build.gradle.kts
-printf '        versionCode = 100\n        versionName = "0.2.0-gecko-alpha1"\n' > geckoapp/build.gradle.kts
 printf '# BUILDLOG\n' > BUILDLOG.md
 printf '# TASKS\n- [ ] first task\n' > TASKS.md
 git checkout -q -b sess1
@@ -132,10 +137,10 @@ printf '%s\n' "token=ghp_$(printf 'a%.0s' $(seq 1 36))" > leak.txt
 git add -A >/dev/null 2>&1
 check "secretscan blocks a GitHub token" '! bash tools/secretscan.sh'
 git reset -q; rm -f leak.txt
-mkdir -p signing/dev; echo pub > signing/dev/kestrel-dev.jks; echo priv > my-private.jks; truncate -s 91M huge.bin
+mkdir -p signing/dev; echo pub > signing/dev/optimizer-dev.jks; echo priv > my-private.jks; truncate -s 91M huge.bin
 git add -A >/dev/null 2>&1
 bash tools/secretscan.sh >/dev/null 2>&1
-check "path guard unstages a private keystore and a 91 MB file but keeps the public dev key" '[ -n "$(git diff --cached --name-only | grep -x signing/dev/kestrel-dev.jks)" ] && [ -z "$(git diff --cached --name-only | grep -e my-private.jks -e huge.bin)" ]'
+check "path guard unstages a private keystore and a 91 MB file but keeps the public dev key" '[ -n "$(git diff --cached --name-only | grep -x signing/dev/optimizer-dev.jks)" ] && [ -z "$(git diff --cached --name-only | grep -e my-private.jks -e huge.bin)" ]'
 git reset -q; rm -rf signing/dev my-private.jks huge.bin
 
 # ---------------------------------------------------------------- autosave + push
@@ -171,10 +176,14 @@ bash tools/ckpt.sh "did two" "do three" >/dev/null 2>&1
 N2="$(sed -n '1s/^# CHECKPOINT \([0-9]*\).*/\1/p' CHECKPOINT.md)"
 check "ckpt numbers only go up"  '[ "${N2:-0}" -gt "${N1:-99}" ]'
 check "ckpt pushed everything"   '[ "$(bash tools/unpushed.sh)" = 0 ]'
+printf 'Co-Authored-By: Someone <s@example.invalid>\nClaude-Session: https://example.invalid/s/1\n' > .git/ckpt-trailer
+bash tools/ckpt.sh "trailer test" "n" >/dev/null 2>&1
+check "ckpt appends the optional .git/ckpt-trailer attribution instead of the default one" 'git log -1 --format=%B | grep -q "^Claude-Session: https://example.invalid/s/1$" && ! git log -1 --format=%B | grep -q "^Co-Authored-By: Claude <"'
+rm -f .git/ckpt-trailer
 
 # ---------------------------------------------------------------- resume: briefing, interruption, stranded branch
 OUT="$(bash tools/resume.sh --text 2>&1)"
-check "resume prints CHECKPOINT + open task" 'printf "%s" "$OUT" | grep -q "do three" && printf "%s" "$OUT" | grep -q "first task"'
+check "resume prints CHECKPOINT + open task" 'printf "%s" "$OUT" | grep -q "n$" && printf "%s" "$OUT" | grep -q "first task"'
 check "resume reports a clean state (no interruption warning)" '! printf "%s" "$OUT" | grep -q "INTERRUPTED MID-CHANGE"'
 echo wip > b.txt; bash tools/autosave.sh --text >/dev/null
 OUT="$(bash tools/resume.sh --text 2>&1)"
@@ -208,7 +217,7 @@ check "a real conflict is reported, the merge is aborted and nothing is lost" 'O
 git merge -q -s ours --no-edit origin/sess4 >/dev/null 2>&1; bash tools/push.sh
 git clone -q -b sess1 "$T/remote.git" "$T/cold" 2>/dev/null
 NEXTWORD="$(sed -n '/^## Do this next/{n;p}' CHECKPOINT.md | cut -c1-12)"
-check "a COLD clone with no context is told the exact next step" 'COUT="$(cd "$T/cold" && bash tools/resume.sh --text 2>&1)"; printf "%s" "$COUT" | grep -q "RESUMING KESTREL" && printf "%s" "$COUT" | grep -q "Do this next" && printf "%s" "$COUT" | grep -qF "$NEXTWORD"'
+check "a COLD clone with no context is told the exact next step" 'COUT="$(cd "$T/cold" && bash tools/resume.sh --text 2>&1)"; printf "%s" "$COUT" | grep -q "RESUMING OPTIMIZER" && printf "%s" "$COUT" | grep -q "Do this next" && printf "%s" "$COUT" | grep -qF "$NEXTWORD"'
 
 # ---------------------------------------------------------------- inbox capture
 printf '{"prompt":"please build X, my key is ghp_%s ok"}' "$(printf 'c%.0s' $(seq 1 36))" | bash tools/capture_inbox.sh
@@ -230,20 +239,17 @@ printf '%s\n' "{\"type\":\"assistant\",\"message\":{\"role\":\"assistant\",\"con
 printf '{"hook_event_name":"PostToolUse","transcript_path":"%s"}' "$OB_T" | bash tools/autosave.sh >/dev/null 2>&1
 check "outbox: a tool-call hook keeps substantial text, so a chat that dies mid-turn still leaves its findings" '[ "$(grep -c "^## 20" OUTBOX.md)" = 2 ]'
 
-# ---------------------------------------------------------------- release recording + the ship gate (two apps, one BUILDLOG)
-check "record-release refuses a tag that is not Kestrel's"            '! bash tools/record-release.sh v0.1.0 "x"'
-check "record-release refuses a tag whose version is not the Gradle one" '! bash tools/record-release.sh kestrel-v9.9.9 "x"'
-check "record-release writes the web line and pushes it"              'bash tools/record-release.sh kestrel-v0.1.0 "first web" && grep -q "^| kestrel-v0.1.0 | web | code 1 | " BUILDLOG.md && [ "$(bash tools/unpushed.sh)" = 0 ]'
-check "record-release is idempotent"                                  'bash tools/record-release.sh kestrel-v0.1.0 "again" | grep -q "already in BUILDLOG" && [ "$(grep -c "^| kestrel-v0.1.0 |" BUILDLOG.md)" = 1 ]'
-check "record-release writes the gecko line with its own code"         'bash tools/record-release.sh kestrel-g-v0.2.0-gecko-alpha1 "first gecko" && grep -q "^| kestrel-g-v0.2.0-gecko-alpha1 | gecko | code 100 | " BUILDLOG.md'
-check "the gates read each app separately (web code 1, gecko code 100)" '. tools/appinfo.sh; [ "$(app_last_code web)" = 1 ] && [ "$(app_last_code gecko)" = 100 ]'
-SHIPOUT="$(bash ship.sh web "x" 2>&1)"
-check "ship refuses a non-increased web versionCode" 'printf "%s" "$SHIPOUT" | grep -q "not higher" && ! printf "%s" "$SHIPOUT" | grep -q "ready for GitHub"'
-SHIPOUT="$(bash ship.sh gecko "x" 2>&1)"
-check "ship refuses a non-increased gecko versionCode" 'printf "%s" "$SHIPOUT" | grep -q "not higher" && ! printf "%s" "$SHIPOUT" | grep -q "ready for GitHub"'
-check "ship refuses an unknown app name" '! bash ship.sh desktop "x" >/dev/null 2>&1'
+# ---------------------------------------------------------------- release recording + the ship gate
+check "record-release refuses a tag that is not Optimizer's"            '! bash tools/record-release.sh kestrel-v0.1.0 "x" && ! bash tools/record-release.sh release-1 "x"'
+check "record-release refuses a tag whose version is not the Gradle one" '! bash tools/record-release.sh v9.9.9 "x"'
+check "record-release writes the line and pushes it"                    'bash tools/record-release.sh v0.1.0 "first release" && grep -q "^| v0.1.0 | code 1 | " BUILDLOG.md && [ "$(bash tools/unpushed.sh)" = 0 ]'
+check "record-release is idempotent"                                    'bash tools/record-release.sh v0.1.0 "again" | grep -q "already in BUILDLOG" && [ "$(grep -c "^| v0.1.0 |" BUILDLOG.md)" = 1 ]'
+check "the gates read the recorded code (1)"                            '. tools/appinfo.sh; [ "$(app_last_code)" = 1 ]'
+SHIPOUT="$(bash ship.sh "x" 2>&1)"
+check "ship refuses a non-increased versionCode" 'printf "%s" "$SHIPOUT" | grep -q "not higher" && ! printf "%s" "$SHIPOUT" | grep -q "ready for GitHub"'
+check "ship refuses to run without a change note" '! bash ship.sh >/dev/null 2>&1'
 OUT="$(bash tools/resume.sh --text 2>&1)"
-check "resume shows the recorded codes of both apps" 'printf "%s" "$OUT" | grep -q "web code 1, gecko code 100"'
+check "resume shows the recorded code" 'printf "%s" "$OUT" | grep -q "last recorded: code 1"'
 
 echo "handoff self-test: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
