@@ -60,7 +60,7 @@ object SystemReader {
     }
 
     /** Free bytes where the app keeps its cache (the storage test's home); -1 when unknown. */
-    fun cacheFreeBytes(context: Context): Long = guard { context.cacheDir.usableSpace } ?: -1L
+    fun cacheFreeBytes(context: Context): Long = guard { StatFs(context.cacheDir.path).availableBytes } ?: -1L
 
     private fun readFile(path: String): String = guard { File(path).readText() } ?: ""
 
