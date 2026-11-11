@@ -100,7 +100,7 @@ if ! command -v python3 >/dev/null 2>&1; then
   exit 1
 fi
 
-mkdir -p "$(dirname "$TARGET")"
+[ "$MODE" = "check" ] || mkdir -p "$(dirname "$TARGET")"      # a check never creates directories (it used to leave an empty one behind)
 
 CLAUDE_INSTALL_MODE="$MODE" CLAUDE_INSTALL_QUIET="$QUIET" \
 CLAUDE_INSTALL_TARGET="$TARGET" CLAUDE_INSTALL_TEMPLATE="$TEMPLATE" \
