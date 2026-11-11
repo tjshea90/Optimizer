@@ -19,7 +19,7 @@ CERT="$(tr -d ' \r\n' < signing/CERT_SHA256)"
   echo "**$TITLE $VN** (versionCode $VC): RAM and process optimizer for the owner's Android 10 Go tablet (MT8168, 2 GB, 32-bit)."
   echo
   echo "- Install: open this page on the tablet, tap \`$ASSET\`, and allow installing from this source if Android asks. It installs over the previous $TITLE because the signing certificate is the same."
-  echo "- If Android says \"App not installed\" or \"not enough storage\": an install only finishes while a tenth of the tablet's storage stays free afterwards (roughly 1.4 GB free on a 16 GB tablet). Free some room (old installer files in Downloads, Settings > Storage) and try again."
+  echo "- If Android says \"App not installed\" or \"not enough storage\": an install needs more free room than the APK itself (Android also keeps a reserve), so free some space (old installer files in Downloads, Settings > Storage, or Optimizer's What uses my storage) and try again."
   echo "- Built and signed by GitHub Actions from commit \`${GITHUB_SHA:-unknown}\`; the certificate was verified on this exact APK (SHA-256 \`$CERT\`)."
   echo "- APK SHA-256: \`$SUM\`"
 } > release-notes.md
