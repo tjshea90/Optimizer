@@ -17,8 +17,10 @@ Browser and Launcher repos, that the tablet has **2 GB of RAM**, **no Google Pla
 | **No Google Play Store / Google services** (owner) | Never depend on GMS APIs; manual APK updates from GitHub Releases. |
 | **Internet only via phone hotspot** (owner) | Metered and flaky: the app needs no network. No INTERNET permission until a feature proves it must. |
 
-## Still unknown (the first measurements; TASKS R3)
-Install the skeleton, tap **Copy report**, and have the owner paste it back. It prints the true values of: total and available RAM, free RAM, file cache, swap used/total (is zram on, how big),
-the heap class and large-heap class, the low-RAM flag, the lowmem threshold, the ABI list and the build's security patch. Update this file with them.
-Not yet knowable from an app, to research: which processes are resident at idle and what each costs (needs `dumpsys meminfo`, i.e. adb), the lmkd/zram configuration, storage speed (eMMC), the
-cached-process limit, and which preinstalled apps run in the background. See `research/FEASIBILITY.md`.
+## Measured on the tablet (2026-11-11, Optimizer v0.2.0 Copy report; details and meaning: `research/BASELINE_2026-11-11.md`)
+RAM 1.91 GB total (691 MB available at the time, swap 621 MB used of 1.72 GB), 4 x Cortex-A53 with crypto extensions (`aes pmull sha1 sha2 crc32`), heap 128 MB (large 256 MB), lowmem threshold 144 MB, thermal NONE,
+**data partition 27.75 GB with only 996 MB (3%) free**, flash write 31.3 MB/s sequential + fsync, 4 KB synced writes 1.74 ms mean / 5.93 ms 95th percentile, uptime 6 days, 182 packages (138 system, 44 added),
+animation scales held at 0.0 by the Launcher during that session. Apps cannot read `/proc/vmstat` or `/proc/swaps` on this ROM.
+
+## Still unknown (needs the PC survey, `tools/adb/README.md`)
+Whether the swap is zram or flash, the memory-pressure counters, which processes are resident and what each costs, the compile state of the apps, what fills the storage, DuraSpeed's effect, storage read speed, GPU strings, cpu governor and frequencies. See `research/BOUNDARIES.md` section 5.

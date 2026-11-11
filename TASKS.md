@@ -45,6 +45,13 @@ building like my other reps. This repo will be an app to optimize ram and proces
 - [ ] P4 Approved levers, one list at a time, each reversible with an undo script and a before/after: ahead-of-time compile of named apps; DuraSpeed on/off A/B; parking of named preinstalled apps; background limits for named apps; storage hygiene. The owner approves each list first
 - [ ] P5 Small in-app support: show (read-only) the state of what the PC steps changed, keep a plain-language guide of the commands and their undo
 
+## Owner request 3, 2026-11-11 ~22:50Z (verbatim in INBOX.md) - the owner pasted the v0.2.0 Copy report (answers OWNER-8a)
+- [x] RPT-1 First real run on the tablet: v0.2.0 installed and ran; report saved in research/tablet/2026-11-11-app-report-v0.2.0.txt; analysis research/BASELINE_2026-11-11.md (storage 97% full, swap 621 MB of 1.72 GB, flash speed normal, 6-day uptime)
+- [ ] ST1 STORAGE IS NOW LEVER 1. Extend the PC survey with the storage breakdown (`dumpsys diskstats`, folder sizes, the APK installers in Downloads) so the digest says what fills the 27.75 GB
+- [ ] ST2 v0.3.0 in-app "What uses my storage" (read-only): totals for images/video/audio/apps, per-app size + data + cache sorted, tap = open that app's Android storage page; needs the Usage access special permission (owner toggles it once in Settings); NEVER deletes anything. Also say WHY an n/a is n/a in the report (apps cannot read /proc/vmstat or /proc/swaps)
+- [ ] ST3 After the owner frees space (their choice, item by item): re-run the Storage speed test and the survey, write the before/after into research/BASELINE_<date>.md
+- [ ] ST4 Tell the Browser sessions via the owner: UPDATE_STORAGE.md assumed a 16 GB tablet; the real data partition is 27.75 GB with 3% free
+
 ## Request 1b - the app: optimize RAM and processes on the MT8168 Android 10 Go tablet for the best speed possible (feature list NOT written yet)
 - [ ] R1 Research: what an ordinary (non-root, locked-bootloader) Android 10 app can do for RAM/process speed - PARTLY ANSWERED 2026-11-11: research/FEASIBILITY.md now carries the evidence (privilege ladder, re-ranked levers, why a persistent on-device helper and an accessibility service are out). Still `[?]`: everything that needs tablet data (P1/P2) or the Android 10 source
 - [x] R2 Read the Launcher and Browser repos' notes on what this tablet allowed (adb helper, accessibility, grants) so nothing is re-derived: Launcher `HANDOFF.md` / `CLAUDE.md`, Browser `docs/HARDWARE.md` - Launcher and Browser surveyed (see research/BOUNDARIES.md); finding: the ROM's DuraSpeed is ON, the Launcher already self-compiles and clears Recents, the Browser exits itself when idle
