@@ -1,37 +1,39 @@
-# Build, sign and release the Kestrel APKs on GitHub's runners (the owner's rule across all his repos: "GitHub actions should do all the
+# Build, sign and release the Optimizer APK on GitHub's runners (the owner's rule across all his repos: "GitHub actions should do all the
 # app compiling and apk making. Claude codes the app, GitHub makes the apk.").
 #
-# TWO APPS, one workflow:   web   = Kestrel   (:app, system WebView, ~2 MB, tag kestrel-v<version>)
-#                           gecko = Kestrel G (:geckoapp, Firefox engine, ~92 MB, tag kestrel-g-v<version>)
-# Dispatch with  app = gecko | web | both  and  full_build = true.  full_build = false is a ~1 minute check that the gates still pass.
-# Claude dispatches it through the GitHub API (mcp__github__actions_run_trigger, run_workflow) after `bash ship.sh <app> "note"`.
+# Dispatch with  full_build = true  to test, build, sign and verify.  Add  publish = true  to also make the GitHub Release (tag v<versionName>).
+#   full_build = false  is a ~1 minute check that the gates still pass.
+#   full_build = true, publish = false  builds and verifies, then keeps the APK as a workflow ARTIFACT for 14 days and publishes NOTHING
+#   (the way to prove a CI change without burning a version number or creating a public Release).
+# Claude dispatches it through the GitHub API (mcp__github__actions_run_trigger, run_workflow) after `bash ship.sh "note"`.
 #
 # MINUTES ARE THE SCARCE RESOURCE (tools/test_handoff.sh fails if either rule is undone):
 #   1. NEVER add a `push:` branch trigger. autosave commits and pushes after every tool call; a push trigger would start a run every few
 #      seconds. Tags and manual dispatch only.
-#   2. Cheap gates first; a manual run does the gates only unless full_build is ticked.
+#   2. Cheap gates first; a manual run does the gates only unless full_build is ticked. Tests, lint, build and publish share ONE job
+#      (each extra job pays the JDK + Gradle + SDK setup again).
 #
 # SIGNING: every APK must carry the certificate pinned in signing/CERT_SHA256, because the tablet refuses an update signed by anything else.
-#   - default: the PUBLIC dev key committed in signing/dev/ (the same key that signed every APK delivered so far);
+#   - default: the PUBLIC dev key committed in signing/dev/ (see signing/README.md);
 #   - if the repo secret SIGNING_KEYSTORE_BASE64 exists (with SIGNING_STORE_PASSWORD, SIGNING_KEY_ALIAS, SIGNING_KEY_PASSWORD) that private key signs
 #     instead, and signing/CERT_SHA256 must then be re-pinned on purpose. tools/verify-apk.sh checks the ARTIFACT, not just the key that went in.
 #
-# GitHub creates the release tag itself (`gh release create --target`): a tag PUSH from the Claude sandbox is refused (403). This workflow COMMITS
-# NOTHING (a workflow that pushed would retrigger the autosave machinery); tools/record-release.sh writes BUILDLOG.md after the run is green.
+# GitHub creates the release tag itself (`gh release create --target`, in .github/scripts/publish-release.sh): a tag PUSH from the Claude sandbox is
+# refused (403). This workflow COMMITS NOTHING (a workflow that pushed would retrigger the autosave machinery); tools/record-release.sh writes
+# BUILDLOG.md after the run is green.
 name: Build APK
 
 on:
   push:
-    tags: ['kestrel-v*', 'kestrel-g-v*']
+    tags: ['v[0-9]*']
   workflow_dispatch:
     inputs:
-      app:
-        description: 'Which app: gecko = Kestrel G (Firefox engine), web = Kestrel (system WebView), or both'
-        type: choice
-        options: [gecko, web, both]
-        default: gecko
       full_build:
-        description: 'Test, build, sign and publish (several minutes of Actions time). Leave OFF for a ~1 min check of the gates.'
+        description: 'Test, build, sign and verify (a few minutes of Actions time). Leave OFF for a ~1 min check of the gates.'
+        type: boolean
+        default: false
+      publish:
+        description: 'Also publish the GitHub Release (tag v<versionName>). Leave OFF to keep the APK only as a 14-day workflow artifact.'
         type: boolean
         default: false
       note:
@@ -42,10 +44,10 @@ on:
 permissions:
   contents: write
 
-# A second dispatch for the same ref and app WAITS instead of cancelling a run that may be in the middle of publishing.
-# (The build jobs below also hold a repo-wide lock per app, so two Claude sessions on different branches can never publish the same tag at once.)
+# A second dispatch for the same ref WAITS instead of cancelling a run that may be in the middle of publishing.
+# (The build job below also holds a repo-wide lock, so two Claude sessions on different branches can never publish the same tag at once.)
 concurrency:
-  group: apk-${{ github.ref }}-${{ inputs.app || github.ref_name }}
+  group: apk-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -54,9 +56,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
-      web: ${{ steps.plan.outputs.web }}
-      gecko: ${{ steps.plan.outputs.gecko }}
       full: ${{ steps.plan.outputs.full }}
+      publish: ${{ steps.plan.outputs.publish }}
     steps:
       - uses: actions/checkout@v5
 
@@ -64,23 +65,23 @@ jobs:
         id: plan
         env:
           EVENT: ${{ github.event_name }}
-          APP: ${{ inputs.app }}
           FULL: ${{ inputs.full_build }}
-          REF_NAME: ${{ github.ref_name }}
+          PUBLISH: ${{ inputs.publish }}
         run: |
-          web=false; gecko=false; full=false
+          full=false; publish=false
           if [ "$EVENT" = "push" ]; then
-            full=true
-            case "$REF_NAME" in kestrel-g-v*) gecko=true ;; kestrel-v*) web=true ;; esac
+            full=true; publish=true            # a v<version> tag means a release was meant
           else
             [ "$FULL" = "true" ] && full=true
-            case "$APP" in web) web=true ;; gecko) gecko=true ;; both) web=true; gecko=true ;; esac
+            [ "$full" = true ] && [ "$PUBLISH" = "true" ] && publish=true
           fi
-          { echo "web=$web"; echo "gecko=$gecko"; echo "full=$full"; } >> "$GITHUB_OUTPUT"
-          if [ "$full" = true ]; then
-            echo "FULL BUILD of: web=$web gecko=$gecko (tests, APK, signature check, publish)." >> "$GITHUB_STEP_SUMMARY"
+          { echo "full=$full"; echo "publish=$publish"; } >> "$GITHUB_OUTPUT"
+          if [ "$full" = true ] && [ "$publish" = true ]; then
+            echo "FULL BUILD + PUBLISH (tests, lint, APK, signature check, GitHub Release)." >> "$GITHUB_STEP_SUMMARY"
+          elif [ "$full" = true ]; then
+            echo "FULL BUILD, NO RELEASE (tests, lint, APK, signature check; the APK is kept as a 14-day workflow artifact)." >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "GATES ONLY for: web=$web gecko=$gecko. Re-run with **full_build** ticked, or create a Release tag, to build." >> "$GITHUB_STEP_SUMMARY"
+            echo "GATES ONLY. Re-run with **full_build** ticked (and **publish** for a Release) to build." >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Gate - shell tooling self-test (save ladder, secret scan, workflow rules)
@@ -97,7 +98,7 @@ jobs:
             printf '%s' "$KS_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
             KS="$RUNNER_TEMP/release.jks"; PW="$STORE_PW"; AL="$KEY_ALIAS"; SRC="private key from the repo secrets"
           else
-            KS=signing/dev/kestrel-dev.jks; PW=kestrel-dev; AL=kestrel-dev; SRC="public dev key (signing/dev)"
+            KS=signing/dev/optimizer-dev.jks; PW=optimizer-dev; AL=optimizer-dev; SRC="public dev key (signing/dev)"
           fi
           GOT="$(keytool -list -v -keystore "$KS" -storepass "$PW" -alias "$AL" 2>/dev/null | sed -n 's/.*SHA256: *//p' | head -1 | tr -d ':' | tr 'A-F' 'a-f')"
           WANT="$(tr -d ' \r\n' < signing/CERT_SHA256)"
@@ -109,65 +110,29 @@ jobs:
           echo "Signing with the $SRC; certificate $WANT matches the pin." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Gate - versionCode is not a downgrade
-        env:
-          WEB: ${{ steps.plan.outputs.web }}
-          GECKO: ${{ steps.plan.outputs.gecko }}
         run: |
           . tools/appinfo.sh
-          for app in web gecko; do
-            case "$app" in web) on="$WEB" ;; gecko) on="$GECKO" ;; esac
-            [ "$on" = true ] || continue
-            VC="$(app_vcode "$app")"; PREV="$(app_last_code "$app")"
-            echo "$app: $(app_title "$app") $(app_vname "$app") versionCode $VC, highest shipped $PREV"
-            if [ "$VC" -lt "$PREV" ]; then
-              echo "::error::$app versionCode $VC is LOWER than the highest shipped ($PREV): Android refuses a downgrade."
-              exit 1
-            fi
-            # An EQUAL code is a rebuild of the current release (allowed: same certificate => in-place reinstall). ship.sh, which publishes
-            # a NEW release, enforces the stricter "higher".
-          done
+          VC="$(app_vcode)"; PREV="$(app_last_code)"
+          echo "$(app_title) $(app_vname) versionCode $VC, highest shipped $PREV"
+          if [ "$VC" -lt "$PREV" ]; then
+            echo "::error::versionCode $VC is LOWER than the highest shipped ($PREV): Android refuses a downgrade."
+            exit 1
+          fi
+          # An EQUAL code is a rebuild of the current release (allowed: same certificate => in-place reinstall). ship.sh, which publishes
+          # a NEW release, enforces the stricter "higher".
 
-  # ------------------------------------------------------------------ minutes: the JVM suites + lint (once, shared by both apps)
-  test-jvm:
+  # ------------------------------------------------------------------ minutes: tests + lint + build + verify + (publish)
+  build:
     needs: check
     if: needs.check.outputs.full == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v5
-      - uses: ./.github/actions/setup-build
-      - name: Core + filter-list tool + app unit tests, lint
-        run: ./gradlew :core:test :tools:build :app:testDebugUnitTest :app:lintRelease --console=plain
-
-  # ------------------------------------------------------------------ the injected WebView scripts in real headless Chromium
-  test-js:
-    needs: check
-    if: needs.check.outputs.full == 'true' && needs.check.outputs.web == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Injected-script tests in Chromium
-        working-directory: web-tests
-        run: |
-          npm install --no-save playwright
-          npx playwright install --with-deps chromium
-          npm test
-
-  # ------------------------------------------------------------------ Kestrel (system WebView)
-  build-web:
-    needs: [check, test-jvm, test-js]
-    if: needs.check.outputs.full == 'true' && needs.check.outputs.web == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # one build/publish at a time across ALL branches
     concurrency:
-      group: release-web
+      group: release-build
       cancel-in-progress: false
     env:
-      APP: web
+      PUBLISH: ${{ needs.check.outputs.publish }}
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-build
@@ -183,80 +148,38 @@ jobs:
             printf '%s' "$KS_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
             { echo "storeFile=$RUNNER_TEMP/release.jks"; echo "storePassword=$STORE_PW"; echo "keyAlias=$KEY_ALIAS"; echo "keyPassword=$KEY_PW"; } > keystore.properties
           fi
+
+      - name: Unit tests and lint
+        run: ./gradlew :app:testDebugUnitTest :app:lintRelease --console=plain
 
       - name: Build the release APK (R8, signed)
         run: ./gradlew :app:assembleRelease --console=plain
 
       - name: Verify the APK itself (certificate pin, package, version, no GMS, size)
-        run: bash tools/verify-apk.sh "$APP"
+        run: bash tools/verify-apk.sh
 
       - name: Publish the Release
+        if: env.PUBLISH == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           NOTE: ${{ inputs.note }}
-        run: bash .github/scripts/publish-release.sh "$APP"
+        run: bash .github/scripts/publish-release.sh
 
-      - name: Keep the APK for inspection (failed runs only)
-        if: failure()
+      - name: Keep the APK as a workflow artifact (no Release was made)
+        if: env.PUBLISH != 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: unpublished-web-apk
+          name: optimizer-apk
           path: app/build/outputs/apk/release/app-release.apk
-          retention-days: 7
-          if-no-files-found: ignore
-
-      - name: Remove the signing material from the workspace
-        if: always()
-        run: rm -f keystore.properties "$RUNNER_TEMP/release.jks"
-
-  # ------------------------------------------------------------------ Kestrel G (Firefox engine)
-  build-gecko:
-    needs: [check, test-jvm]
-    if: needs.check.outputs.full == 'true' && needs.check.outputs.gecko == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    concurrency:
-      group: release-gecko
-      cancel-in-progress: false
-    env:
-      APP: gecko
-    steps:
-      - uses: actions/checkout@v5
-      - uses: ./.github/actions/setup-build
-
-      - name: Private signing key (only when the repo secret exists)
-        env:
-          KS_B64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
-          STORE_PW: ${{ secrets.SIGNING_STORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-          KEY_PW: ${{ secrets.SIGNING_KEY_PASSWORD }}
-        run: |
-          if [ -n "$KS_B64" ]; then
-            printf '%s' "$KS_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
-            { echo "storeFile=$RUNNER_TEMP/release.jks"; echo "storePassword=$STORE_PW"; echo "keyAlias=$KEY_ALIAS"; echo "keyPassword=$KEY_PW"; } > keystore.properties
-          fi
-
-      - name: Build the release APK (GeckoView 160 armeabi-v7a, R8, signed)
-        run: ./gradlew :geckoapp:assembleRelease --console=plain
-
-      - name: Every configured Gecko pref must exist in the bundled engine
-        run: bash tools/check-gecko-prefs.sh
-
-      - name: Verify the APK itself (certificate pin, package, version, no GMS, size)
-        run: bash tools/verify-apk.sh "$APP"
-
-      - name: Publish the Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          NOTE: ${{ inputs.note }}
-        run: bash .github/scripts/publish-release.sh "$APP"
+          retention-days: 14
+          if-no-files-found: error
 
       - name: Keep the APK for inspection (failed runs only)
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: unpublished-gecko-apk
-          path: geckoapp/build/outputs/apk/release/geckoapp-release.apk
+          name: failed-run-apk
+          path: app/build/outputs/apk/release/app-release.apk
           retention-days: 7
           if-no-files-found: ignore
 
