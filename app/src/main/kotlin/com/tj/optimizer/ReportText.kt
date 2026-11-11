@@ -105,8 +105,8 @@ object ReportText {
         }
         fun mb(v: Double) = String.format(java.util.Locale.US, "%.1f MB/s", v)
         appendLine("Storage speed test (${bench.sizeMb} MB temporary file in this app's cache, deleted afterwards):")
-        appendLine("  write + fsync: ${mb(bench.writeMBps)}")
-        appendLine("  read:          ${mb(bench.readMBps)}")
-        appendLine("  random 4 KB:   mean ${bench.randomReadMeanUs} us, 95th percentile ${bench.randomReadP95Us} us (about ${bench.randomReadIops} reads/s), ${bench.randomReads} reads")
+        appendLine("  sequential write + fsync: ${mb(bench.writeMBps)}")
+        appendLine("  small synced writes (4 KB + fsync, like a database commit): mean ${bench.syncWriteMeanUs} us, 95th percentile ${bench.syncWriteP95Us} us (about ${bench.syncWritesPerSecond}/s), ${bench.syncWrites} writes")
+        appendLine("  (reads are not timed: the system keeps a file it just wrote in RAM, so a read-back would measure memory, not the flash chip)")
     }
 }

@@ -53,12 +53,12 @@ class ReportTextTest {
 
     @Test
     fun theStorageTestShowsItsResultsOrWhyThereAreNone() {
-        val r = StorageBenchResult(64, 18.5, 85.0, 950, 2100, 1000)
+        val r = StorageBenchResult(64, 18.5, 4000, 9000, 200)
         val t = ReportText.build(full(), r)
         assertTrue(t, t.contains("Storage speed test (64 MB temporary file in this app's cache, deleted afterwards):"))
-        assertTrue(t, t.contains("write + fsync: 18.5 MB/s"))
-        assertTrue(t, t.contains("read:          85.0 MB/s"))
-        assertTrue(t, t.contains("mean 950 us, 95th percentile 2100 us (about 1052 reads/s), 1000 reads"))
+        assertTrue(t, t.contains("sequential write + fsync: 18.5 MB/s"))
+        assertTrue(t, t.contains("mean 4000 us, 95th percentile 9000 us (about 250/s), 200 writes"))
+        assertTrue(t, t.contains("reads are not timed"))
         assertTrue(ReportText.build(full(), null, "running, about 10 to 30 seconds").contains("Storage speed test: running, about 10 to 30 seconds"))
     }
 }

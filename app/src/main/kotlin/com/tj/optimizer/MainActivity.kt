@@ -5,8 +5,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.graphics.Typeface
 import android.os.Bundle
-import android.system.Os
-import android.system.OsConstants
 import android.util.TypedValue
 import android.view.ViewGroup
 import android.widget.Button
@@ -15,7 +13,6 @@ import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import java.io.File
-import java.io.FileInputStream
 
 /**
  * The first screen: a plain-text snapshot of this tablet's RAM, swap, storage and limits, and one on-demand storage speed test.
@@ -112,7 +109,7 @@ class MainActivity : Activity() {
             var result: StorageBenchResult? = null
             var note: String? = null
             try {
-                result = StorageBench.run(File(dir, "storage-bench.tmp"), BENCH_MB, BENCH_RANDOM_READS) { dropPageCache(it) }
+                result = StorageBench.run(File(dir, "storage-bench.tmp"), BENCH_MB, BENCH_SYNC_WRITES)
             } catch (e: Exception) {
                 note = "failed: ${e.javaClass.simpleName}"
             }
@@ -127,18 +124,9 @@ class MainActivity : Activity() {
         }.start()
     }
 
-    /** Evicts the test file's pages from the page cache (posix_fadvise DONTNEED); best effort, without it the read numbers measure RAM. */
-    private fun dropPageCache(file: File) {
-        try {
-            FileInputStream(file).use { Os.posix_fadvise(it.fd, 0L, 0L, OsConstants.POSIX_FADV_DONTNEED) }
-        } catch (e: Exception) {
-            // not fatal: the report then simply shows faster reads than the flash chip really gives
-        }
-    }
-
     private companion object {
         const val BENCH_MB = 64
-        const val BENCH_RANDOM_READS = 1000
+        const val BENCH_SYNC_WRITES = 200
         const val MIN_FREE_FOR_BENCH = 256L * 1024 * 1024
     }
 }
