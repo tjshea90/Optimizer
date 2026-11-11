@@ -8,12 +8,12 @@ building like my other reps. This repo will be an app to optimize ram and proces
 
 ## Request 1a - save system, GitHub saves, GitHub Actions APK building (same system as the Browser / Launcher repos)
 - [x] I1 Study the owner's system: Browser (newest, multi-session), Launcher, LinkMeter - read-only clones, nothing copied blindly; the Browser `tools/` set is the template
-- [ ] I2 Port the save ladder (autosave, capture_inbox/outbox, ckpt, sync, claim, resume, install-hooks, push, secretscan, toobig, ship.sh, bootstrap.sh) - files are in and auto-checkpointing is live on GitHub (16+ commits pushed); ticks when I7 is green
+- [x] I2 Port the save ladder (autosave, capture_inbox/outbox, ckpt, sync, claim, resume, install-hooks, push, secretscan, toobig, ship.sh, bootstrap.sh) - auto-checkpoint commits appeared on origin within seconds of the first edits (16 before the first deliberate ckpt); `bash tools/test_handoff.sh` 63 passed, 0 failed
 - [x] I3 Android skeleton that really builds - `./gradlew :app:testDebugUnitTest :app:lintRelease :app:assembleRelease` BUILD SUCCESSFUL in 30 s here; `bash tools/verify-apk.sh` all OK (pinned certificate, package, version, no GMS, 27 KB)
 - [x] I4 Public dev keystore `signing/dev/optimizer-dev.jks` + pinned certificate `signing/CERT_SHA256` (same arrangement the owner chose for Launcher and Browser)
-- [ ] I5 `.github/workflows/android.yml` for ONE app: tags + manual dispatch only (never a `push:` branch trigger), inputs `full_build` / `publish` / `note`, GitHub creates the tag; `setup-build` action and `publish-release.sh` adapted
-- [ ] I6 Docs for a cold start: CLAUDE.md, HANDOFF.md, BRIEF.md, README.md, AGENTS.md, docs/HARDWARE.md, docs/ARCHITECTURE.md, research/FEASIBILITY.md
-- [ ] I7 `bash tools/test_handoff.sh` green (hermetic self-test of the whole save/release system; it also runs inside every `ckpt` and as the first CI gate)
+- [x] I5 `.github/workflows/android.yml` for ONE app: tags + manual dispatch only (never a `push:` branch trigger), inputs `full_build` / `publish` (default false) / `note`, GitHub creates the tag; `setup-build` action and `publish-release.sh` adapted - written and checked by test_handoff.sh (YAML parses, no push trigger, inputs present); its first real run is I8
+- [x] I6 Docs for a cold start: CLAUDE.md, HANDOFF.md, BRIEF.md, README.md, AGENTS.md, docs/HARDWARE.md, docs/ARCHITECTURE.md, research/FEASIBILITY.md (written; the cold-clone briefing is exercised by test_handoff.sh)
+- [x] I7 `bash tools/test_handoff.sh` green - 63 passed, 0 failed in 10 s (hermetic self-test of the whole save/release system; it also runs inside every `ckpt` and as the first CI gate)
 - [ ] I8 Prove the CI end to end: dispatch android.yml with `full_build=true, publish=false` on this branch -> green, APK artifact downloads and passes `tools/verify-apk.sh` (publishes NOTHING)
 - [ ] I9 Tell the owner what was set up, what was and was not verified, and the OWNER items below
 

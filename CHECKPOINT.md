@@ -1,19 +1,23 @@
-# CHECKPOINT 20 — read me first, then TASKS.md
+# CHECKPOINT 32 — read me first, then TASKS.md
 
-**Written:** 2026-11-11T21:22:42Z · **tests:** 1 RED: test_handoff.sh (0 green)
-**Branch:** `ccr-726a5950-fnv7m9` · **builds on:** `e23cdaa` (this checkpoint is the commit after it)
+**Written:** 2026-11-11T21:27:15Z · **tests:** all 1 fast checks green (gradle suite: see ship.sh)
+**Branch:** `ccr-726a5950-fnv7m9` · **builds on:** `00243aa` (this checkpoint is the commit after it)
 
 ## Just done
-Ported the Browser repo's save ladder into this single-app repo (tools/*.sh, ship.sh, bootstrap.sh, hooks in .claude/settings.json; auto-checkpoint commits are live on GitHub). Android skeleton com.tj.optimizer (minSdk 29, targetSdk 29, memory-snapshot screen, 7 JVM tests). Public dev keystore pinned in signing/CERT_SHA256. TASKS/CLAUDE/BUILDLOG/INBOX written. Local ./gradlew :app:testDebugUnitTest :app:lintRelease :app:assembleRelease is green and tools/verify-apk.sh passes every check on the APK.
+CI + docs done and the whole tooling self-test is green (63 passed, 0 failed). Rewrote android.yml for ONE app (check job + one build job; v[0-9]* tags and manual dispatch only; inputs full_build, publish default false, note; publish=false keeps a 14-day artifact), setup-build action and publish-release.sh. Wrote HANDOFF, BRIEF, README, AGENTS, docs/HARDWARE (device id left out), docs/ARCHITECTURE, research/FEASIBILITY (unverified hypotheses, labelled). TASKS I2, I5, I6, I7 ticked.
 
 ## Do this next
-1) Rewrite .github/workflows/android.yml (still the Browser's two-app copy): a check job then ONE build job; tag trigger v*; inputs full_build/publish/note; publish=false keeps the APK as a 14-day artifact; adapt .github/actions/setup-build (platform 36 + build-tools 36.0.0 only) and .github/scripts/publish-release.sh (single app, tag v<ver>, asset Optimizer-v<ver>.apk). 2) Write HANDOFF.md, BRIEF.md, README.md, AGENTS.md, docs/HARDWARE.md (Browser's hardware_.txt WITHOUT the Android device id line), docs/ARCHITECTURE.md, research/FEASIBILITY.md. 3) bash tools/test_handoff.sh until green (red now: workflow inputs, HANDOFF/BRIEF missing), then tick I2 and I7 in TASKS.md. 4) Dispatch android.yml full_build=true publish=false on this branch, confirm green and that the artifact APK passes tools/verify-apk.sh (I8). 5) Final report to the owner (I9).
+I8: dispatch android.yml on branch ccr-726a5950-fnv7m9 with inputs {full_build:true, publish:false, note:'CI proof'} via mcp__github__actions_run_trigger (load it with ToolSearch select:mcp__github__actions_run_trigger,mcp__github__actions_list,mcp__github__get_job_logs). Wait with a background until-loop (first run is cold, expect 3-6 min). On green: download the optimizer-apk artifact is not possible from here, so confirm the job log shows 'Verify the APK itself' all OK; tick I8 in TASKS.md with the run id. On red: read get_job_logs (tail_lines ~60), fix, re-dispatch (publish=false again; never publish a Release). Then I9: final report to the owner (what was set up, what was and was not verified, the OWNER-1..6 questions).
 
 *(resuming? CLAUDE.md's "FIRST ACTION OF EVERY SESSION" says how; the briefing is tools/resume.sh. Do that first, or autosave may stay off all session.)*
 
 ## Uncommitted right now
-    (nothing — the tree is clean as of this checkpoint)
+     M TASKS.md
 
 ## Last ten checkpoints
 ```
+  9fa6a48 ckpt 20: Ported the Browser repo's save ladder into this single-app repo (tools/*.sh, sh
 ```
+
+(11 automatic checkpoint(s) since the last deliberate one — the
+session was still mid-step. `git diff` against it shows what changed.)
