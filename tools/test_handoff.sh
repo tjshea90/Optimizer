@@ -112,6 +112,7 @@ export CLAUDE_HOOK_SETTINGS="$T/settings.json" CLAUDE_REPO_ROOT="$T"   # never t
 # ---------------------------------------------------------------- hooks installer
 echo '{"permissions":{"allow":["Bash"]},"hooks":{"Stop":[{"hooks":[{"type":"command","command":"echo other # launcher-checkpoint-hooks"}]}]}}' > "$CLAUDE_HOOK_SETTINGS"
 check "install-hooks reports MISSING before install" '! bash tools/install-hooks.sh --check'
+check "install-hooks --check writes nothing and creates no directory" 'NEWD="$T/never-created"; CLAUDE_HOOK_SETTINGS="$NEWD/s.json" bash tools/install-hooks.sh --check; [ ! -e "$NEWD" ]'
 check "install-hooks installs"                      'bash tools/install-hooks.sh --quiet && bash tools/install-hooks.sh --check'
 check "install-hooks is idempotent (no change)"     'B=$(cat "$CLAUDE_HOOK_SETTINGS"); bash tools/install-hooks.sh --quiet; [ "$B" = "$(cat "$CLAUDE_HOOK_SETTINGS")" ]'
 check "install-hooks keeps permissions + a sibling repo's hook" 'python3 -I -c "
