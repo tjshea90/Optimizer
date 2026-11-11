@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Framework-only theme (no AppCompat/Material). Dark only, no window animations anywhere: the tablet is judged on snappiness. -->
+    <style name="Theme.Optimizer" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowBackground">@color/window_bg</item>
+        <item name="android:statusBarColor">@color/window_bg</item>
+        <item name="android:navigationBarColor">@color/window_bg</item>
+        <item name="android:forceDarkAllowed">false</item>
+        <item name="android:textColorPrimary">@color/text</item>
+        <item name="android:textColorSecondary">@color/text_muted</item>
+        <item name="android:colorAccent">@color/accent</item>
+    </style>
+</resources>

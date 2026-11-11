@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Optimizer</string>
+    <string name="refresh">Refresh</string>
+    <string name="copy_report">Copy report</string>
+    <string name="copied">Report copied</string>
+</resources>

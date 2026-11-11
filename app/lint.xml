@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lint>
+    <!-- Project-wide lint exceptions go here, each with the reason. Currently none: the build.gradle.kts lint block holds the toolchain-pinning ones. -->
+</lint>
