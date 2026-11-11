@@ -22,7 +22,7 @@ D="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"; cd "$D" || exit 0
 # ---- PATH GUARD: unstage (never block) key material by NAME and files GitHub would refuse ----------------------------------
 # Names: keystores, .env files, *.pem and friends must never be committed (the one exception is the PUBLIC dev key in signing/dev/).
 # Size: GitHub rejects a push that contains a file over 100 MB, and that would wedge EVERY later autosave push, so anything over
-# 90 MB (a built Kestrel G APK is ~92 MB) is unstaged too. Both are reported on stderr; the rest of the commit goes ahead.
+# 90 MB (a stray build output or an APK dropped in the tree) is unstaged too. Both are reported on stderr; the rest of the commit goes ahead.
 while IFS= read -r F; do
   [ -z "$F" ] && continue
   BADWHY=""

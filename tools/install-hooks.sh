@@ -12,7 +12,7 @@
 # That works, and it is also an unconditional overwrite of the one file a
 # user's own Claude Code settings live in — permissions, env, statusLine,
 # and hooks belonging to OTHER projects in the same container (this account
-# runs other repos, Launcher and Portfolio, side by
+# runs other repos, Launcher and Browser, side by
 # side with this one). Every session that ran that `cp` would silently
 # delete whatever those repos had written there. Nothing warns, because a
 # clobbered settings file looks exactly like a settings file.
@@ -24,10 +24,10 @@
 #
 # WHY EVERY INSTALLED COMMAND IS AN ABSOLUTE PATH INTO THIS REPO ONLY
 # ------------------------------------------------------------------
-# The owner runs several repos side by side (Launcher, Portfolio, Browser...). A session that has more than one of them
+# The owner runs several repos side by side (Launcher, Browser, LinkMeter...). A session that has more than one of them
 # attached gets ONE shared session root. A glob here would let a session commit and push inside a sibling repo as a
-# side effect of Kestrel's infrastructure, so every command below is this repo's own absolute path, the marker is
-# unique to Kestrel ("optimizer-checkpoint-hooks"), and the installer only ever replaces entries carrying it.
+# side effect of Optimizer's infrastructure, so every command below is this repo's own absolute path, the marker is
+# unique to Optimizer ("optimizer-checkpoint-hooks"), and the installer only ever replaces entries carrying it.
 #
 # WHEN THE REPO IS THE SESSION ROOT (the normal single-repo case: CLAUDE_PROJECT_DIR == this repo) Claude Code reads the
 # committed .claude/settings.json directly, so there is nothing to merge and nothing is written anywhere else.
@@ -175,7 +175,7 @@ for event in list(hooks.keys()):
         else:
             del hooks[event]
 
-# ENV: the template may carry an "env" object (Kestrel's does not); keys in it are merged, everything else in "env" is preserved untouched.
+# ENV: the template may carry an "env" object (Optimizer's does not); keys in it are merged, everything else in "env" is preserved untouched.
 wanted_env = wanted.get("env", {}) or {}
 if wanted_env:
     env = merged.get("env")
@@ -196,7 +196,7 @@ if wanted_env:
 # the user's settings file, where it is meaningless. Remove it when it is
 # unambiguously ours; never touch a _comment that is not.
 c = merged.get("_comment")
-if isinstance(c, str) and ("session-root-hooks.json" in c or "install-hooks.sh" in c) and "kestrel" in c.lower():
+if isinstance(c, str) and ("session-root-hooks.json" in c or "install-hooks.sh" in c) and "optimizer" in c.lower():
     del merged["_comment"]
 
 new_text = json.dumps(merged, indent=2) + "\n"

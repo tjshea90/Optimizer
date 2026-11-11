@@ -2,7 +2,7 @@
 # repomap.sh - a map of the repo for a session with NO context: every source file with its size and the first line of its own doc comment.
 # Prints to stdout only (nothing is committed, so it is never stale and never causes merge conflicts between sessions).
 #   bash tools/repomap.sh            the whole map (about 150 lines)
-#   bash tools/repomap.sh geckoapp   only paths containing the word
+#   bash tools/repomap.sh memory     only paths containing the word
 # Costs far less usage than exploring with Glob/Grep/Read: run it first, then read only the files it points at.
 set -uo pipefail
 D="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"; cd "$D" || exit 1
@@ -11,16 +11,11 @@ import os, re, subprocess
 flt = os.environ.get("FILTER", "")
 files = subprocess.run(["git", "ls-files"], capture_output=True, text=True).stdout.split("\n")
 roots = [
-    ("core/src/main", "core/ - pure Kotlin engine (no Android): filters, URL/omnibox, HTTPS policy, session codec"),
-    ("core/src/test", "core tests"),
-    ("app/src/main/kotlin", "app/ shared Android code (both builds): UI, data, shield, net"),
-    ("app/src/webview", "app/ WebView-only engine code (Kestrel)"),
-    ("app/src/main/assets/js", "injected page scripts (WebView build)"),
-    ("app/src/test", "app tests (Robolectric)"),
-    ("geckoapp/src/main/kotlin", "geckoapp/ Gecko engine code (Kestrel G)"),
-    ("geckoapp/src/main/assets", "geckoapp/ built-in WebExtension (Kestrel Shields)"),
-    ("tools/src", "tools/ Gradle JVM CLI that compiles filter lists into .kfs"),
-    ("web-tests", "web-tests/ Playwright tests of the injected scripts"),
+    ("app/src/main/kotlin", "app/ Android code (package com.tj.optimizer): UI, memory/process readers, policies"),
+    ("app/src/main/java", "app/ Android code (Java)"),
+    ("app/src/main/res", "app/ resources"),
+    ("app/src/test", "app JVM unit tests (pure logic, no emulator)"),
+    ("app/src/androidTest", "app instrumented tests"),
 ]
 def describe(path):
     try:

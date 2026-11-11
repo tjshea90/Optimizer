@@ -20,7 +20,7 @@ for a in "$@"; do [ "$a" = "--text" ] && TEXT_MODE=1; done
 bash tools/install-hooks.sh --quiet >/dev/null 2>&1 || true
 
 BRIEF="$(
-  echo "=== RESUMING KESTREL BROWSER - light private browser for an Android 10 Go tablet (Kestrel = system WebView, Kestrel G = Firefox GeckoView). A previous session may have been cut off. ==="
+  echo "=== RESUMING OPTIMIZER - RAM and process optimizer for an Android 10 Go tablet (MT8168, 2 GB, 32-bit). A previous session may have been cut off. ==="
   echo "=== Do NOT re-plan or re-read finished work: continue from 'Do this next' below. ==="
   echo
 
@@ -78,7 +78,7 @@ BRIEF="$(
 
     # A release GitHub built that nobody recorded would let the next build reuse a versionCode already on the tablet
     # (Android then refuses the install). GitHub creates the tags (a push of one from here is refused), `git fetch --tags` brings them.
-    for T in $(git tag -l 'kestrel-v*' 'kestrel-g-v*' 2>/dev/null | head -20); do
+    for T in $(git tag -l 'v[0-9]*' 2>/dev/null | head -20); do
       grep -q "^| ${T} |" BUILDLOG.md 2>/dev/null || echo "  !!    $T WAS RELEASED BUT NEVER RECORDED - run:  bash tools/record-release.sh $T \"what it changed\""
     done
 
@@ -107,8 +107,8 @@ BRIEF="$(
   command -v java >/dev/null 2>&1 && echo "  OK    java" || echo "  WARN  no java - gradlew cannot run"
   AH="${ANDROID_HOME:-/opt/android-sdk}"
   [ -d "$AH/platforms" ] && echo "  OK    android sdk: $(ls "$AH/platforms" | tr '\n' ' ')" || echo "  note  no android sdk here - APKs are built by GitHub Actions anyway (android.yml)"
-  echo "  APKs: GitHub Actions builds + signs them, Releases hold them (tags kestrel-v<ver> / kestrel-g-v<ver>). No emulator/KVM in the cloud sandbox."
-  echo "  last recorded: web code $(app_last_code web 2>/dev/null || echo ?), gecko code $(app_last_code gecko 2>/dev/null || echo ?) (BUILDLOG.md); now in Gradle: web $(app_vname web 2>/dev/null) ($(app_vcode web 2>/dev/null)), gecko $(app_vname gecko 2>/dev/null) ($(app_vcode gecko 2>/dev/null))"
+  echo "  APKs: GitHub Actions builds + signs them, Releases hold them (tag v<versionName>). No emulator/KVM in the cloud sandbox."
+  echo "  last recorded: code $(app_last_code 2>/dev/null || echo ?) (BUILDLOG.md); now in Gradle: $(app_vname 2>/dev/null) (code $(app_vcode 2>/dev/null))"
   echo
 
   if [ -f CHECKPOINT.md ]; then
@@ -136,8 +136,8 @@ BRIEF="$(
   cat <<'SHORT'
 - Checkpoint after EVERY step:  bash tools/ckpt.sh "did" "next"   (no gate; "next" is what no diff can recover).
 - New request from the owner -> TASKS.md as [ ] boxes in their words FIRST, ckpt, then code.
-- GitHub Actions builds EVERY APK ("Claude codes, GitHub makes the APK"): bash ship.sh <web|gecko> "note", then dispatch android.yml
-  (mcp__github__actions_run_trigger run_workflow, ref = this branch, inputs app + full_build=true), then bash tools/record-release.sh <tag> "note".
+- GitHub Actions builds EVERY APK ("Claude codes, GitHub makes the APK"): bash ship.sh "note", then dispatch android.yml
+  (mcp__github__actions_run_trigger run_workflow, ref = this branch, inputs full_build=true + publish=true), then bash tools/record-release.sh <tag> "note".
 - Never commit a key (signing/dev is the one intentional PUBLIC dev key). Never curl api.github.com (a hook blocks it): use the GitHub MCP tools.
 - Device/engine/hotspot rules and the architecture map: CLAUDE.md, BRIEF.md. No emulator/KVM here: say honestly what was and was not run.
 - AUTO-RESUME: on a long job keep ONE heartbeat (id in the latest ckpt 'next'); a cut-off notice with a reset time -> send_later at reset+2 min.
