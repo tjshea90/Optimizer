@@ -19,8 +19,9 @@ import re, sys
 ALLOWED = [
   r"date", r"getprop", r"wm (size|density)", r"df -h", r"top -b -n 1 -m \d+", r"ps -A -o [A-Z,]+",
   r"cat /proc/(uptime|version|cpuinfo|meminfo|swaps|vmstat|buddyinfo|loadavg|mounts)", r"cat /sys/devices/system/cpu/online",
-  r"grep -H \. (/[A-Za-z0-9_./*-]+ ?)+",
-  r"dumpsys (thermalservice|meminfo|SurfaceFlinger|display|activity oom|activity lru|procstats --hours \d+|package dexopt|deviceidle whitelist)",
+  r"grep -H \. (/[A-Za-z0-9_./*:-]+ ?)+",
+  r"dumpsys (thermalservice|meminfo|SurfaceFlinger|display|diskstats|activity oom|activity lru|procstats --hours \d+|package dexopt|deviceidle whitelist)",
+  r"du -sk (/sdcard/[A-Za-z0-9_/]+ ?)+", r"ls -l /sdcard/Download/\*\.apk",
   r"pm list packages( -[a-z0-9])*",
   r"cmd appops query-op RUN_ANY_IN_BACKGROUND (ignore|deny)",
   r"settings get (global|system) [A-Za-z_.]+", r"settings list (global|system)",
