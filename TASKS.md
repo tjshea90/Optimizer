@@ -25,6 +25,7 @@ building like my other reps. This repo will be an app to optimize ram and proces
 - [x] OWNER-5 Signing key: ANSWERED "I don't care if it is public" -> the committed public dev key stays (signing/README.md); no private key needed
 - [x] OWNER-6 First release: ANSWERED "Have github build the release" (2026-11-11 22:08Z) -> REL-1 below
 
+- [ ] OWNER-8 (asked 2026-11-11) Two small things, either one helps: (a) install Optimizer v0.2.0 on the tablet (https://github.com/tjshea90/Optimizer/releases/tag/v0.2.0), tap **Storage speed test**, then **Copy report** and paste the text to Claude; (b) run the read-only PC survey while the tablet feels sluggish (`tools/adb/README.md`: double-click `intake.bat`, or `bash intake.sh`) and send `optimizer-report.txt`. Claude then runs `bash tools/intake.sh <file>` (TASKS P2)
 - [ ] OWNER-7 Optional, still open: make `main` the default branch and set `tools/MIRROR_MAIN` to `on` (today the default branch is the first session branch ccr-726a5950-fnv7m9). Not blocking; ask only when it matters
 
 ## Owner request 2, 2026-11-11 22:08Z (verbatim in INBOX.md) - the owner's answers to my five questions
