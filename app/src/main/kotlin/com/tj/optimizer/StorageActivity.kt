@@ -102,8 +102,10 @@ class StorageActivity : Activity() {
     }
 
     private fun show(s: StorageSummary) {
+        lastSummary = s
         header.text = StorageModel.header(s)
         accessButton.visibility = if (s.needsUsageAccess) android.view.View.VISIBLE else android.view.View.GONE
+        copyButton.visibility = if (s.apps.isNotEmpty()) android.view.View.VISIBLE else android.view.View.GONE
         rows.removeAllViews()
         val density = resources.displayMetrics.density
         fun dp(v: Int) = (v * density + 0.5f).toInt()
