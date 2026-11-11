@@ -1,21 +1,22 @@
-# CHECKPOINT 47 — read me first, then TASKS.md
+# CHECKPOINT 49 — read me first, then TASKS.md
 
-**Written:** 2026-11-11T22:12:06Z · **tests:** all 1 fast checks green (gradle suite: see ship.sh)
-**Branch:** `ccr-726a5950-fnv7m9` · **builds on:** `1df73c8` (this checkpoint is the commit after it)
+**Written:** 2026-11-11T22:14:08Z · **tests:** all 1 fast checks green (gradle suite: see ship.sh)
+**Branch:** `ccr-726a5950-fnv7m9` · **builds on:** `2c885b4` (this checkpoint is the commit after it)
 
 ## Just done
-Release v0.1.0 DISPATCHED on GitHub Actions: run 43109636536 (android.yml run_number 2) at 22:11Z on head 1df73c8, inputs full_build=true publish=true (this one creates the Release + tag v0.1.0). ship.sh gates passed first (self-test, version check, unit tests).
+Release v0.1.0 PUBLISHED by GitHub Actions (run 43109636536 green: check 16 s, build 69 s, Publish the Release succeeded). Verified on GitHub: https://github.com/tjshea90/Optimizer/releases/tag/v0.1.0 has Optimizer-v0.1.0.apk (28154 bytes, same size as the local build) and .sha256, not draft, not prerelease. Recorded in BUILDLOG.md; TASKS REL-1 ticked.
 
 ## Do this next
-WAIT for run 43109636536 - do NOT dispatch again (never ship v0.1.0 twice). Check: mcp__github__actions_list list_workflow_jobs resource_id 43109636536 (expect check + build both success, 'Publish the Release' success). Then mcp__github__get_release_by_tag v0.1.0 must show Optimizer-v0.1.0.apk and its .sha256; then bash tools/record-release.sh v0.1.0 "<the note from ckpt 46>"; tick REL-1 in TASKS.md; give the owner the Release link as plain text. Red run: get_job_logs, fix, re-dispatch (an existing Release is updated in place, not duplicated). Meanwhile R2/G2: research agents survey the Launcher and Browser repos (read-only clones under the scratchpad's sibling folder tjshea90/) -> write research/BOUNDARIES.md.
+R2/G2 in progress: two read-only research agents (Launcher boundary map; Browser memory/process facts) were launched at ~22:19Z and report back by notification - when they do, spot-check the 'must not touch' items with grep in /home/user/tjshea90/launcher (refresh with git fetch --depth=1 origin HEAD) and write research/BOUNDARIES.md; update research/FEASIBILITY.md with the owner's answers (adb cable YES, accessibility OK if it breaks nothing); then draft the feature plan (G3/G4: PC-side adb toolkit with undo, baseline measurement) for the owner to approve. Then tell the owner the release link.
 
 *(resuming? CLAUDE.md's "FIRST ACTION OF EVERY SESSION" says how; the briefing is tools/resume.sh. Do that first, or autosave may stay off all session.)*
 
 ## Uncommitted right now
-    (nothing — the tree is clean as of this checkpoint)
+     M TASKS.md
 
 ## Last ten checkpoints
 ```
+  e928075 ckpt 47: Release v0.1.0 DISPATCHED on GitHub Actions: run 43109636536 (android.yml run_n
   1df73c8 ckpt 46: gated v0.1.0 (code 1) and pushed it: handoff self-test, unit tests and the vers
   a3ce2ec ckpt 45: Recorded the owner's answers (INBOX hook captured the message verbatim and push
   a203193 ckpt 40: CI proven end to end: Actions run 43103221429 GREEN (check 20 s + build 2m52s: 
