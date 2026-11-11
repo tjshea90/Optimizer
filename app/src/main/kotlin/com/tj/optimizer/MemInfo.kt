@@ -47,6 +47,6 @@ class MemInfo(
 fun formatKb(kb: Long): String = when {
     kb < 0 -> "n/a"
     kb >= 1024L * 1024L -> String.format(java.util.Locale.US, "%.2f GB", kb / 1024.0 / 1024.0)
-    kb >= 1024L -> "${kb / 1024} MB"
+    kb >= 1024L -> "${(kb + 512L) / 1024L} MB"   // rounded: the kernel reports a 512 MB swap as 524284 kB, which must not read "511 MB"
     else -> "$kb kB"
 }

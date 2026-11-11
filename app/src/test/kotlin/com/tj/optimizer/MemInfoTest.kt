@@ -64,7 +64,8 @@ class MemInfoTest {
     fun formatsSizesTheWayPeopleReadThem() {
         assertEquals("n/a", formatKb(-1))
         assertEquals("640 kB", formatKb(640))
-        assertEquals("712 MB", formatKb(712344))
+        assertEquals("696 MB", formatKb(712344))      // 695.6 MB, rounded
+        assertEquals("512 MB", formatKb(524284))      // the kernel's "512 MB" swap is 524284 kB
         assertEquals("1.86 GB", formatKb(1953264))
     }
 
@@ -74,8 +75,8 @@ class MemInfoTest {
             lowRamDevice = true, memoryClassMb = 128, largeMemoryClassMb = 256, lowMemoryNow = false, lowMemoryThresholdKb = 153600, mem = MemInfo.parse(sample))
         val text = ReportText.build(facts)
         assertTrue(text, text.contains("RAM total:      1.86 GB"))
-        assertTrue(text, text.contains("RAM available:  712 MB (36%)"))
-        assertTrue(text, text.contains("Swap used:      140 MB of 512 MB"))
+        assertTrue(text, text.contains("RAM available:  696 MB (36%)"))
+        assertTrue(text, text.contains("Swap used:      143 MB of 512 MB"))
         assertTrue(text, text.contains("Low-RAM (Go) device: true"))
         assertTrue(text, text.contains("CPU ABIs: armeabi-v7a, armeabi"))
         val noMem = ReportText.build(DeviceFacts("0.1.0", "10", 29, "?", "x", emptyList(), false, 128, 256, false, 0, null))
