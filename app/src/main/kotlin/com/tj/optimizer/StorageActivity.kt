@@ -54,6 +54,11 @@ class StorageActivity : Activity() {
             visibility = android.view.View.GONE
             setOnClickListener { openUsageAccessSettings() }
         }
+        copyButton = Button(this).apply {
+            text = getString(R.string.copy_list)
+            visibility = android.view.View.GONE
+            setOnClickListener { copyList() }
+        }
         val hint = TextView(this).apply {
             text = getString(R.string.storage_hint)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
