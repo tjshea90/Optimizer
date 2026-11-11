@@ -52,6 +52,16 @@ class ReportTextTest {
     }
 
     @Test
+    fun aNearlyFullStorageIsFlaggedAndUnreadableLinesSayWhy() {
+        val low = DeviceFacts("0.3.0", "10", 29, "?", "x", emptyList(), true, 128, 256, false, 0, meminfo,
+            dataTotalBytes = 29_796_335_616L, dataFreeBytes = 1_044_381_696L)
+        val t = ReportText.build(low)
+        assertTrue(t, t.contains("Storage (data): 996 MB free of 27.75 GB (3%) - VERY LOW"))
+        assertTrue(t, t.contains("Memory-pressure counters: n/a (Android 10 does not let apps read /proc/vmstat"))
+        assertTrue(t, t.contains("Swap device:    n/a (Android 10 does not let apps read /proc/swaps"))
+    }
+
+    @Test
     fun theStorageTestShowsItsResultsOrWhyThereAreNone() {
         val r = StorageBenchResult(64, 18.5, 4000, 9000, 200)
         val t = ReportText.build(full(), r)
