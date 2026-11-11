@@ -13,7 +13,8 @@ LIST="$D/tools/adb/intake-commands.txt"
 FIX="$D/tools/testdata/intake-sample/optimizer-report.txt"
 
 # ---------------------------------------------------------------- the command list is read-only by construction
-check "every command in intake-commands.txt is on the read-only allow-list (and uses no character that writes, chains or breaks the Windows runner)" 'python3 -I - "$LIST" <<PY
+# (the checker is a file written with a QUOTED heredoc: backticks, $ and backslashes in its regexes must reach Python untouched)
+cat > "$T/ro_check.py" <<'PYEOF'
 import re, sys
 ALLOWED = [
   r"date", r"getprop", r"wm (size|density)", r"df -h", r"top -b -n 1 -m \d+", r"ps -A -o [A-Z,]+",
@@ -24,31 +25,45 @@ ALLOWED = [
   r"cmd appops query-op RUN_ANY_IN_BACKGROUND (ignore|deny)",
   r"settings get (global|system) [A-Za-z_.]+", r"settings list (global|system)",
 ]
+FORBID = set('<>;&`$"%^!\\')
 def split_pipes(cmd):
-    out, cur, q = [], "", False
+    out, cur, quoted = [], "", False
     for ch in cmd:
-        if ch == "\x27": q = not q
-        if ch == "|" and not q: out.append(cur.strip()); cur = ""
-        else: cur += ch
-    out.append(cur.strip()); return out
+        if ch == "'": quoted = not quoted
+        if ch == "|" and not quoted:
+            out.append(cur.strip()); cur = ""
+        else:
+            cur += ch
+    out.append(cur.strip())
+    return out
 labels, bad = set(), []
 for n, line in enumerate(open(sys.argv[1], encoding="utf-8"), 1):
     line = line.rstrip("\n")
-    if not line.strip() or line.lstrip().startswith("#"): continue
-    if "|" not in line: bad.append("line %d has no label|command" % n); continue
+    if not line.strip() or line.lstrip().startswith("#"):
+        continue
+    if "|" not in line:
+        bad.append("line %d has no label|command" % n); continue
     label, cmd = line.split("|", 1)
-    if not re.fullmatch(r"[a-z0-9-]+", label) or label in labels: bad.append("line %d bad or repeated label %r" % (n, label))
+    if not re.fullmatch(r"[a-z0-9-]+", label) or label in labels:
+        bad.append("line %d: bad or repeated label %r" % (n, label))
     labels.add(label)
-    if re.search(r"[<>;&`$\x22%^!\\\\]", cmd): bad.append("line %d uses a forbidden character: %s" % (n, cmd[:60]))
+    if any(c in FORBID for c in cmd):
+        bad.append("line %d uses a forbidden character: %s" % (n, cmd[:60]))
     segs = split_pipes(cmd)
-    if not any(re.fullmatch(p, segs[0]) for p in ALLOWED): bad.append("line %d first command not allowed: %s" % (n, segs[0][:70]))
-    for s in segs[1:]:
-        if not re.fullmatch(r"grep( -[a-zA-Z])+ \x27[^\x27]*\x27", s): bad.append("line %d: only grep may follow a pipe: %s" % (n, s[:60]))
-if bad: print("\n".join(bad)); sys.exit(1)
+    if not any(re.fullmatch(p, segs[0]) for p in ALLOWED):
+        bad.append("line %d: first command not on the allow-list: %s" % (n, segs[0][:70]))
+    for seg in segs[1:]:
+        if not re.fullmatch(r"grep( -[a-zA-Z])+ '[^']*'", seg):
+            bad.append("line %d: only grep may follow a pipe: %s" % (n, seg[:60]))
+if bad:
+    print("\n".join(bad)); sys.exit(1)
 print(len(labels), "commands, all read-only")
-PY'
-check "the Windows runner reads the same list and writes nothing but the report" 'grep -q "intake-commands.txt" "$D/tools/adb/intake.bat" && ! grep -qiE "(^| )(del|rd|rmdir|erase|format|move|copy) " "$D/tools/adb/intake.bat"'
-check "the shell runner passes bash -n and never calls adb with anything but get-state and shell" 'bash -n "$D/tools/adb/intake.sh" && ! grep -E "adb (push|pull|install|uninstall|reboot|root|remount|sideload|forward|reverse|tcpip|connect)" "$D/tools/adb/intake.sh" "$D/tools/adb/intake.bat"'
+PYEOF
+check "every command in intake-commands.txt is on the read-only allow-list (and uses no character that writes, chains or breaks the Windows runner)" 'python3 -I "$T/ro_check.py" "$LIST"'
+printf 'x|rm -rf /data/local/tmp\n' > "$T/bad1.txt"; printf 'x|cat /proc/meminfo > /sdcard/x\n' > "$T/bad2.txt"; printf 'x|dumpsys meminfo | sh\n' > "$T/bad3.txt"; printf 'x|am force-stop com.foo\n' > "$T/bad4.txt"
+check "the read-only checker itself rejects a delete, a redirect, a pipe into sh and a force-stop" '! python3 -I "$T/ro_check.py" "$T/bad1.txt" && ! python3 -I "$T/ro_check.py" "$T/bad2.txt" && ! python3 -I "$T/ro_check.py" "$T/bad3.txt" && ! python3 -I "$T/ro_check.py" "$T/bad4.txt"'
+check "the Windows runner reads the same list and deletes/moves/copies nothing" 'grep -q "intake-commands.txt" "$D/tools/adb/intake.bat" && ! grep -qiE "(^| )(del|rd|rmdir|erase|format|move|copy) " "$D/tools/adb/intake.bat"'
+check "the runners pass bash -n and never call adb with anything but get-state and shell" 'bash -n "$D/tools/adb/intake.sh" && ! grep -E "adb (push|pull|install|uninstall|reboot|root|remount|sideload|forward|reverse|tcpip|connect)" "$D/tools/adb/intake.sh" "$D/tools/adb/intake.bat"'
 
 # ---------------------------------------------------------------- the runner, against a fake adb
 mkdir -p "$T/bin"
@@ -65,8 +80,8 @@ chmod +x "$T/bin/adb"
 export FAKE_ADB_LOG="$T/adb.log"
 NCMD="$(grep -c -E '^[^#[:space:]]' "$LIST")"
 check "intake.sh writes one section per command, in order, with no carriage returns, and ends with the end marker" 'PATH="$T/bin:$PATH" bash "$D/tools/adb/intake.sh" "$T/report.txt" >/dev/null && [ "$(grep -c "^##### " "$T/report.txt")" = "$((NCMD+1))" ] && tail -1 "$T/report.txt" | grep -q "^##### end$" && ! grep -q "$(printf "\r")" "$T/report.txt" && grep -q "^# optimizer-report" "$T/report.txt"'
-check "intake.sh asked adb only get-state once and then one shell command per list line, exactly the list" 'head -1 "$FAKE_ADB_LOG" | grep -qx "get-state" && [ "$(grep -c "^shell " "$FAKE_ADB_LOG")" = "$NCMD" ] && [ "$(grep -vc -E "^(get-state|shell )" "$FAKE_ADB_LOG")" = 0 ]'
-check "intake.sh stops with a helpful message and writes NO file when the tablet is not ready" 'rm -f "$T/none.txt"; FAKE_ADB_STATE=unauthorized PATH="$T/bin:$PATH" bash "$D/tools/adb/intake.sh" "$T/none.txt" 2>&1 | grep -q "No tablet is ready" && [ ! -e "$T/none.txt" ]'
+check "intake.sh asked adb get-state once and then exactly one shell command per list line" 'head -1 "$FAKE_ADB_LOG" | grep -qx "get-state" && [ "$(grep -c "^shell " "$FAKE_ADB_LOG")" = "$NCMD" ] && [ "$(grep -vc -E "^(get-state|shell )" "$FAKE_ADB_LOG")" = 0 ]'
+check "intake.sh exits non-zero with a helpful message and writes NO file when the tablet is not ready" 'rm -f "$T/none.txt"; O="$(FAKE_ADB_STATE=unauthorized PATH="$T/bin:$PATH" bash "$D/tools/adb/intake.sh" "$T/none.txt" 2>&1)"; RC=$?; [ "$RC" -ne 0 ] && printf "%s" "$O" | grep -q "No tablet is ready" && [ ! -e "$T/none.txt" ]'
 
 # ---------------------------------------------------------------- the repo-side processor
 OUTD="$T/out"
@@ -82,7 +97,8 @@ check "a credential in the report refuses the whole intake and saves nothing" '!
 printf 'just some text, not a survey\n' > "$T/foreign.txt"
 check "something that is not a survey is refused and saves nothing" '! bash "$D/tools/intake.sh" "$T/foreign.txt" --out "$T/out-foreign" --date 2026-04-04 >/dev/null 2>&1 && [ ! -e "$T/out-foreign" ]'
 check "a bad --date is refused (it becomes a folder name)" '! bash "$D/tools/intake.sh" "$FIX" --out "$T/out-date" --date ../../x >/dev/null 2>&1 && [ ! -e "$T/out-date" ]'
-check "a report with unexpected content still saves the redacted copy (the digest may be thin, the data is never lost)" 'printf "##### props\nnothing useful\n##### meminfo\nMemTotal: lots kB\n##### end\n" > "$T/thin.txt"; bash "$D/tools/intake.sh" "$T/thin.txt" --out "$T/out-thin" --date 2026-05-05 >/dev/null && [ -f "$T/out-thin/2026-05-05/optimizer-report.txt" ] && [ -f "$T/out-thin/2026-05-05/FACTS.md" ]'
+printf '##### props\nnothing useful\n##### meminfo\nMemTotal: lots kB\n##### end\n' > "$T/thin.txt"
+check "a report with unexpected content still saves the redacted copy (the digest may be thin, the data is never lost)" 'bash "$D/tools/intake.sh" "$T/thin.txt" --out "$T/out-thin" --date 2026-05-05 >/dev/null && [ -f "$T/out-thin/2026-05-05/optimizer-report.txt" ] && [ -f "$T/out-thin/2026-05-05/FACTS.md" ]'
 
 echo "intake self-test: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
