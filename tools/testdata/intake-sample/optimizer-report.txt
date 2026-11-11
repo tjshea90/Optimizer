@@ -1,0 +1,267 @@
+# optimizer-report: READ-ONLY survey written by tools/adb/intake.sh
+# host date: 2026-01-01T12:00:00Z
+
+##### time
+Thu Jan  1 12:00:01 GMT 2026
+
+##### uptime
+273456.78 1203456.12
+
+##### kernel
+Linux version 4.14.141 (build@host) (clang version 8.0.7) #1 SMP PREEMPT Mon Jul 1 12:00:00 CST 2024
+
+##### props
+[dalvik.vm.heapgrowthlimit]: [128m]
+[dalvik.vm.heapsize]: [256m]
+[pm.dexopt.install]: [speed-profile]
+[pm.dexopt.bg-dexopt]: [speed-profile]
+[ro.config.low_ram]: [true]
+[ro.build.version.release]: [10]
+[ro.build.version.sdk]: [29]
+[ro.product.model]: [alps 711]
+[ro.build.fingerprint]: [alps/vnd_tb8168p1_bsp/tb8168p1_bsp:10/QP1A.190711.020/1719850017:user/release-keys]
+[ro.serialno]: [FAKESERIAL12345]
+[ro.boot.serialno]: [FAKESERIAL12345]
+[persist.sys.owner]: [someone@example.invalid]
+[ro.boot.btmac]: [02:00:00:aa:bb:cc]
+[dhcp.wlan0.ipaddress]: [192.0.2.44]
+[ro.some.counter]: [1234567890123456]
+[persist.sys.timezone]: [America/New_York]
+
+##### cpuinfo
+processor	: 0
+model name	: ARMv7 Processor rev 4 (v7l)
+BogoMIPS	: 26.00
+Features	: half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae evtstrm aes pmull sha1 sha2 crc32
+CPU implementer	: 0x41
+CPU part	: 0xd03
+CPU revision	: 4
+
+processor	: 1
+model name	: ARMv7 Processor rev 4 (v7l)
+BogoMIPS	: 26.00
+Features	: half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae evtstrm aes pmull sha1 sha2 crc32
+CPU implementer	: 0x41
+CPU part	: 0xd03
+CPU revision	: 4
+
+processor	: 2
+model name	: ARMv7 Processor rev 4 (v7l)
+BogoMIPS	: 26.00
+Features	: half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae evtstrm aes pmull sha1 sha2 crc32
+CPU implementer	: 0x41
+CPU part	: 0xd03
+CPU revision	: 4
+
+processor	: 3
+model name	: ARMv7 Processor rev 4 (v7l)
+BogoMIPS	: 26.00
+Features	: half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae evtstrm aes pmull sha1 sha2 crc32
+CPU implementer	: 0x41
+CPU part	: 0xd03
+CPU revision	: 4
+
+Hardware	: MT8168
+
+
+##### cpu-online
+0-3
+
+##### cpufreq-cpu0
+/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor:schedutil
+/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq:1100000
+/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq:500000
+/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq:2000000
+/sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies:500000 700000 900000 1100000 1300000 1500000 1700000 2000000
+
+##### thermal-zones
+/sys/class/thermal/thermal_zone0/type:mtktscpu
+/sys/class/thermal/thermal_zone0/temp:48500
+/sys/class/thermal/thermal_zone1/type:mtktsbattery
+/sys/class/thermal/thermal_zone1/temp:31200
+
+##### thermalservice
+IsStatusOverride: false
+Thermal Status: 0
+Cached temperatures:
+
+##### gpu
+GLES: ARM, Mali-G52, OpenGL ES 3.2 v1.r16p0
+
+##### wm-size
+Physical size: 600x1024
+
+##### wm-density
+Physical density: 170
+
+##### meminfo
+MemTotal:        1953264 kB
+MemFree:           61312 kB
+MemAvailable:     311344 kB
+Buffers:           10244 kB
+Cached:           298700 kB
+SwapCached:         3232 kB
+SwapTotal:        524284 kB
+SwapFree:         177912 kB
+
+##### swaps
+Filename				Type		Size	Used	Priority
+/dev/block/zram0                       partition	524284	346372	-2
+
+##### vmstat
+nr_free_pages 15328
+pgmajfault 1230456
+pswpin 523400
+pswpout 801200
+workingset_refault 640000
+allocstall_normal 4100
+allocstall_movable 900
+
+##### pressure
+grep: /proc/pressure/memory: No such file or directory
+grep: /proc/pressure/io: No such file or directory
+grep: /proc/pressure/cpu: No such file or directory
+
+##### zram
+/sys/block/zram0/disksize:536870912
+/sys/block/zram0/comp_algorithm:lz4 [lzo]
+/sys/block/zram0/mm_stat:354684928 118226944 125829120 0 140509184 12 0 0
+
+##### vm-sysctl
+/proc/sys/vm/swappiness:100
+/proc/sys/vm/min_free_kbytes:5120
+/proc/sys/vm/vfs_cache_pressure:100
+/proc/sys/vm/page-cluster:0
+
+##### loadavg
+1.52 1.31 1.20 2/812 12345
+
+##### dumpsys-meminfo
+Applications Memory Usage (in Kilobytes):
+Uptime: 273456000 Realtime: 1203456000
+
+Total PSS by process:
+    151,234K: system (pid 1100)
+    101,888K: com.android.systemui (pid 1450 / activities)
+     88,432K: com.tj.launcher (pid 2201 / activities)
+     72,100K: app.kestrel.browser.gecko (pid 3300 / activities)
+     41,300K: com.example.chat (pid 4100)
+     30,000K: com.android.settings (pid 5000)
+
+Total PSS by OOM adjustment:
+    180,512K: Native
+                   31,200K: surfaceflinger (pid 380)
+    151,234K: System
+                  151,234K: system (pid 1100)
+     88,432K: Foreground
+                   88,432K: com.tj.launcher (pid 2201 / activities)
+    156,000K: Cached
+                   41,300K: com.example.chat (pid 4100)
+
+Total PSS by category:
+    300,000K: Native
+
+Total RAM: 1,953,264K (status moderate)
+ Free RAM:   311,344K (   60,000K cached pss +   190,000K cached kernel +    61,344K free)
+ Used RAM: 1,350,000K (1,100,000K used pss +   250,000K kernel)
+ Lost RAM:   140,920K
+     ZRAM:   122,880K physical used for   346,372K in swap (   524,284K total swap)
+
+##### activity-lru
+ACTIVITY MANAGER LRU PROCESSES (dumpsys activity lru)
+  Activities:
+    #3: fg     TOP  LCM 2201:com.tj.launcher/u0a30 act:activities|recents
+    #2: cch+5  CEM  ??? 4100:com.example.chat/u0a77 act:client-services
+  Other:
+    #1: cch    CEM  ??? 6000:com.example.cached/u0a80
+    #0: cch    CEM  ??? 6100:com.example.cached2/u0a81
+
+##### ps
+  PID  PPID   RSS    VSZ  NI S NAME
+    1     0  2000  20000   0 S init
+
+##### top
+Tasks: 812 total,   2 running
+  PID USER   PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ ARGS
+
+##### dexopt
+Dexopt state:
+  [com.android.settings]
+    path: /system/priv-app/Settings/Settings.apk
+      arm: [status=speed-profile] [reason=bg-dexopt] [primary-abi]
+  [com.tj.launcher]
+    path: /data/app/com.tj.launcher-FAKEPATH==/base.apk
+      arm: [status=speed] [reason=cmdline] [primary-abi]
+  [app.kestrel.browser.gecko]
+    path: /data/app/app.kestrel.browser.gecko-FAKEPATH==/base.apk
+      arm: [status=verify] [reason=install] [primary-abi]
+  [com.example.chat]
+    path: /data/app/com.example.chat-FAKEPATH==/base.apk
+      arm: [status=verify] [reason=install] [primary-abi]
+  [com.example.game]
+    path: /data/app/com.example.game-FAKEPATH==/base.apk
+      arm: [status=quicken] [reason=install] [primary-abi]
+
+##### packages-disabled
+package:com.android.browser
+
+##### packages-third-party
+package:/data/app/com.tj.launcher-FAKEPATH==/base.apk=com.tj.launcher
+package:/data/app/app.kestrel.browser.gecko-FAKEPATH==/base.apk=app.kestrel.browser.gecko
+package:/data/app/com.example.chat-FAKEPATH==/base.apk=com.example.chat
+package:/data/app/com.example.game-FAKEPATH==/base.apk=com.example.game
+
+##### packages-system
+package:com.android.settings
+package:com.android.systemui
+package:com.mediatek.duraspeed
+
+##### deviceidle-whitelist
+system-excidle,com.android.shell,2000
+user,com.tj.launcher,10030
+
+##### appops-bg-ignore
+No operations.
+
+##### appops-bg-deny
+No operations.
+
+##### anim-window
+0.0
+
+##### anim-transition
+0.0
+
+##### anim-animator
+0.0
+
+##### duraspeed-global
+1
+
+##### duraspeed-system
+1
+
+##### activity-manager-constants
+null
+
+##### speed-keys-global
+background_power_saving_enable=0
+default_restrict_background_data=0
+
+##### speed-keys-system
+setting.duraspeed.enabled=1
+SSID: "HomeNetwork"
+
+##### df
+Filesystem       Size  Used Avail Use% Mounted on
+/dev/block/dm-3  2.1G  2.1G     0 100% /
+/dev/block/mmcblk0p33  11G  9.9G  1.1G  90% /data
+
+##### mounts
+/dev/block/mmcblk0p33 /data f2fs rw,lazytime,seclabel,nosuid,nodev,noatime,discard 0 0
+
+##### emmc-queue
+/sys/block/mmcblk0/queue/read_ahead_kb:128
+/sys/block/mmcblk0/queue/scheduler:noop deadline [cfq]
+/sys/block/mmcblk0/queue/nr_requests:128
+##### end
