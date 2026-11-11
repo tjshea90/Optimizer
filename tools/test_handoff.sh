@@ -59,7 +59,8 @@ check "android.yml can write the Release (permissions: contents: write)" 'grep -
 check "android.yml never commits or pushes (a workflow that pushed would retrigger autosave)" '! grep -E "^\s*(run:\s*)?git (push|commit)" "$D/.github/workflows/android.yml"'
 
 # ---------------------------------------------------------------- the repo's own wiring
-check "every tools/*.sh, ship.sh, bootstrap.sh and .github script passes bash -n" 'for f in "$D"/tools/*.sh "$D"/ship.sh "$D"/bootstrap.sh "$D"/.github/scripts/*.sh; do bash -n "$f" || exit 1; done'
+check "every tools/*.sh, tools/adb/*.sh, ship.sh, bootstrap.sh and .github script passes bash -n" 'for f in "$D"/tools/*.sh "$D"/tools/adb/*.sh "$D"/ship.sh "$D"/bootstrap.sh "$D"/.github/scripts/*.sh; do bash -n "$f" || exit 1; done'
+check "the PC-side survey kit passes its own self-test (tools/test_intake.sh: read-only command list, runner, redaction, credential refusal, digest)" 'bash "$D/tools/test_intake.sh"'
 check ".claude/settings.json is valid JSON and every hook command points at an existing tools/ script" 'python3 -I - "$D" <<PY
 import json, re, sys, os
 d = sys.argv[1]
