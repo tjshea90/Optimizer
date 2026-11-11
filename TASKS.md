@@ -38,7 +38,7 @@ building like my other reps. This repo will be an app to optimize ram and proces
 
 ## Request 1b - the app: optimize RAM and processes on the MT8168 Android 10 Go tablet for the best speed possible (feature list NOT written yet)
 - [ ] R1 Research: what an ordinary (non-root, locked-bootloader) Android 10 app can do for RAM/process speed at each privilege level - `research/FEASIBILITY.md` holds the unverified starting hypotheses; verify against the Android 10 source (android-10.0.0_r47, as Launcher did) and write the findings there
-- [~] R2 Read the Launcher and Browser repos' notes on what this tablet allowed (adb helper, accessibility, grants) so nothing is re-derived: Launcher `HANDOFF.md` / `CLAUDE.md`, Browser `docs/HARDWARE.md` {ccr-726a5950-fnv7m9 2026-11-11T22:09Z}
+- [x] R2 Read the Launcher and Browser repos' notes on what this tablet allowed (adb helper, accessibility, grants) so nothing is re-derived: Launcher `HANDOFF.md` / `CLAUDE.md`, Browser `docs/HARDWARE.md` - Launcher and Browser surveyed (see research/BOUNDARIES.md); finding: the ROM's DuraSpeed is ON, the Launcher already self-compiles and clears Recents, the Browser exits itself when idle
 - [ ] R3 Baseline first: the skeleton's snapshot screen (RAM total/available, swap, heap class, low-RAM flag, ABIs) installed on the tablet, owner pastes the "Copy report" text back; real numbers go into docs/HARDWARE.md
 - [ ] R4 Design the feature list with the owner from R1 + OWNER-2/3/4, then write each feature here as `[ ]` boxes with a test that proves it
 
