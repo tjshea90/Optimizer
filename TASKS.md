@@ -14,7 +14,7 @@ building like my other reps. This repo will be an app to optimize ram and proces
 - [x] I5 `.github/workflows/android.yml` for ONE app: tags + manual dispatch only (never a `push:` branch trigger), inputs `full_build` / `publish` (default false) / `note`, GitHub creates the tag; `setup-build` action and `publish-release.sh` adapted - written and checked by test_handoff.sh (YAML parses, no push trigger, inputs present); its first real run is I8
 - [x] I6 Docs for a cold start: CLAUDE.md, HANDOFF.md, BRIEF.md, README.md, AGENTS.md, docs/HARDWARE.md, docs/ARCHITECTURE.md, research/FEASIBILITY.md (written; the cold-clone briefing is exercised by test_handoff.sh)
 - [x] I7 `bash tools/test_handoff.sh` green - 63 passed, 0 failed in 10 s (hermetic self-test of the whole save/release system; it also runs inside every `ckpt` and as the first CI gate)
-- [ ] I8 Prove the CI end to end: dispatch android.yml with `full_build=true, publish=false` on this branch -> green, APK artifact downloads and passes `tools/verify-apk.sh` (publishes NOTHING)
+- [x] I8 Prove the CI end to end - Actions run 43103221429 (android.yml, `full_build=true, publish=false`, head 3a22c7d) GREEN: job `check` 20 s (self-test, signing-pin and versionCode gates), job `build` 2 m 52 s (unit tests + lint 93 s, R8 release build, `tools/verify-apk.sh` step succeeded ON THE RUNNER, Publish the Release skipped as intended); artifact `optimizer-apk` (15 KB zip, expires 2026-11-25) is on the run page. No tag and no Release were created. The artifact was not downloaded or installed from this sandbox
 - [ ] I9 Tell the owner what was set up, what was and was not verified, and the OWNER items below
 
 ## OWNER decisions / actions (nothing here blocks the infrastructure; most block the first real feature)
@@ -30,3 +30,7 @@ building like my other reps. This repo will be an app to optimize ram and proces
 - [ ] R2 Read the Launcher and Browser repos' notes on what this tablet allowed (adb helper, accessibility, grants) so nothing is re-derived: Launcher `HANDOFF.md` / `CLAUDE.md`, Browser `docs/HARDWARE.md`
 - [ ] R3 Baseline first: the skeleton's snapshot screen (RAM total/available, swap, heap class, low-RAM flag, ABIs) installed on the tablet, owner pastes the "Copy report" text back; real numbers go into docs/HARDWARE.md
 - [ ] R4 Design the feature list with the owner from R1 + OWNER-2/3/4, then write each feature here as `[ ]` boxes with a test that proves it
+
+## Later / low priority
+- [ ] CI-1 GitHub warns that `actions/upload-artifact@v4` and `gradle/actions/setup-gradle@v4` target Node 20 (deprecated; GitHub forces Node 24 and the run is green). Bump those majors when the owner's other repos do, or if the warning ever becomes an error
+- [ ] CI-2 Optional `ci.yml` (unit tests + lint on pull requests, never on push) once pull requests are used; Browser has the same optional item
