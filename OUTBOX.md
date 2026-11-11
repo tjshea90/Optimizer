@@ -59,3 +59,7 @@
 >
 > I'll come back with the boundary map and a concrete plan for you to approve.
 <!-- sha:1e574cd21588 -->
+
+## 2026-11-11T22:18:58Z
+> That's the automated notice that the Browser survey finished (not a message from you). It surfaced a `HW_SPEED.md` in the Browser repo with a list of tablet measurements nobody has taken yet. That list is exactly what my intake tooling should collect, so I'll read that section myself while the Launcher survey continues.
+<!-- sha:1ac3cd7cb497 -->
