@@ -63,3 +63,32 @@
 ## 2026-11-11T22:18:58Z
 > That's the automated notice that the Browser survey finished (not a message from you). It surfaced a `HW_SPEED.md` in the Browser repo with a list of tablet measurements nobody has taken yet. That list is exactly what my intake tooling should collect, so I'll read that section myself while the Launcher survey continues.
 <!-- sha:1ac3cd7cb497 -->
+
+## 2026-11-11T22:45:51Z
+> GitHub built and published Optimizer v0.2.0, but none of my changes have been run on your tablet. I left the Launcher and Browser repos untouched. Everything I did is saved to GitHub with nothing outstanding.
+>
+> https://github.com/tjshea90/Optimizer/releases/tag/v0.2.0
+>
+> v0.1.0, the first release, is also published. It installs over nothing and v0.2.0 installs over it.
+>
+> **Version 0.2.0:** the screen now shows CPU, uptime, temperature state, swap, memory-pressure counters since boot, free storage, the number of installed apps and the animation settings (read only). There is a new Storage speed test button that writes a temporary 64 MB file in the app's own cache and deletes it. The app still changes nothing on the tablet.
+>
+> ## What I found in your Launcher and Browser repos
+> - **Nothing in the plan kills processes.** The Launcher already force-stops apps, clears Recents and holds the animation and battery-saver settings. The Browser already ends all its own processes when idle. A fourth killer would only fight them, and killing cached apps usually makes a 2 GB tablet slower.
+> - **The tablet's ROM already has a background-app manager,** MediaTek DuraSpeed, and it is switched on. Nobody has measured whether it helps or hurts. That is the most relevant process-optimization question I found.
+> - **Compiling apps ahead of time is a lever that already worked for you.** The Launcher does it for itself after you complained about slow loading. It lasts until an app is updated.
+> - **There is no on-device helper.** The Launcher's shell helper is silently killed after 15–27 minutes, and network sockets are blocked on this ROM. An accessibility service would add load next to the Launcher's, so I recommend against one.
+> - **A read-only survey from your PC** fills the real gap: your tablet's per-process memory, compile state and heat data does not exist anywhere yet. It is `tools/adb/intake.bat`, with a guide in `tools/adb/README.md`. Every command is read-only, and a self-test fails the build if one isn't. Serial numbers, Wi-Fi names, IPs, e-mails and MAC addresses are removed before anything is saved to the public repo.
+>
+> ## What I need from you (either helps)
+> 1. Install v0.2.0 on the tablet, tap **Storage speed test**, then **Copy report**, and paste the text to me.
+> 2. Run the PC survey while the tablet feels sluggish and send me `optimizer-report.txt`.
+>
+> ## Questions
+> - **Animations:** your Launcher rule says animations stay on in the custom launcher and lock screen and off only in the stock launcher. Optimizer won't touch those settings either way. Do you want that rule left as is?
+> - **`main` branch (optional):** should `main` become the repo's default branch? Today the default is the first session branch.
+>
+> ## Caveats
+> - The survey commands and their output parsing are written from Android 10 knowledge and a made-up sample file; the first real report may need parser fixes. The Windows `.bat` has never run on Windows.
+> - Nothing that changes your tablet is applied yet. After the data arrives I'll propose specific, reversible changes with before-and-after timings, one list at a time, for your approval. Candidates are compiling apps ahead of time, a DuraSpeed on-versus-off test, and background limits for apps you name.
+<!-- sha:5a6bcac12868 -->
