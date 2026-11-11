@@ -236,7 +236,7 @@ def build_facts(sec, source, date, counts):
             lines.append("- /data: " + " ".join(line.split()))
             m = re.search(r"(\d+)%", line)
             if m and int(m.group(1)) >= 85:
-                flags.append("/data is %s%% full: installs need about 10%% free and a nearly full flash slows everything." % m.group(1))
+                flags.append("/data is %s%% full: little room for updates, caches and temporary files, and nearly full flash is known to slow writes (the Browser repo's UPDATE_STORAGE.md has the install-space rule)." % m.group(1))
     for line in sec.get("mounts", "").split("\n"):
         if re.search(r"\s/data\s", line):
             lines.append("- /data mount: " + " ".join(line.split()[:4]))

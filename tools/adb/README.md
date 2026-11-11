@@ -1,6 +1,6 @@
 # Tablet survey from your PC (read-only)
 
-**What it does:** asks the tablet about itself (memory, what is running, how apps are compiled, heat, storage, the ROM's own background manager) and writes the answers
+**What it does:** asks the tablet about itself (memory, what is running, how apps are compiled, heat, **what fills the storage**, the ROM's own background manager) and writes the answers
 into one text file, `optimizer-report.txt`. **It only reads. It changes nothing on the tablet**, and a self-test in this repo fails the build if any command in the list
 could write, kill, disable or install anything. Nothing here touches your Launcher or Browser.
 
@@ -11,7 +11,7 @@ could write, kill, disable or install anything. Nothing here touches your Launch
 2. Plug the tablet in. If it asks "Allow USB debugging?", tap **Allow** (tick "always allow" if you like).
 3. **Windows:** double-click `intake.bat`. **Mac, Linux, or Git Bash on Windows:** open a terminal in the folder and run `bash intake.sh`.
 4. Wait one to two minutes while the section names scroll by. It ends with "Done: optimizer-report.txt ... Nothing on the tablet was changed."
-5. Send me `optimizer-report.txt` (attach it in the chat). I run it through `tools/intake.sh`, which **removes serial numbers, MAC and IP addresses, e-mail addresses and Wi-Fi names before anything is saved** to the public repository, and refuses the whole file if anything key-shaped is left.
+5. Send me `optimizer-report.txt` (attach it in the chat). I run it through `tools/intake.sh`, which **removes serial numbers, MAC and IP addresses, e-mail addresses and Wi-Fi names before anything is saved** to the public repository, **hides the names of installer (.apk) files in Downloads unless they are your own app builds** (only their sizes are kept), and refuses the whole file if anything key-shaped is left. The survey never lists your photos, documents or other file names.
 
 ## Tips
 - **Run it when the tablet feels sluggish**, with your usual apps open, not right after a restart: that is when the numbers show what is slowing it down.
