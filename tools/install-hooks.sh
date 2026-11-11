@@ -89,6 +89,7 @@ if ! command -v python3 >/dev/null 2>&1; then
   # script was written to remove, and doing it "just this once" is how it
   # comes back.
   if [ ! -f "$TARGET" ]; then
+    [ "$MODE" = "check" ] && exit 1      # a check never writes anything
     mkdir -p "$(dirname "$TARGET")"
     sed "s|__OPTIMIZER_TOOLS__|$D/tools|g" "$TEMPLATE" > "$TARGET"
     echo "  OK    hooks installed at $TARGET (no python3 — plain copy, file did not exist)"
