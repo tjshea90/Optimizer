@@ -102,7 +102,7 @@ cp "$D"/ship.sh "$D"/signing/CERT_SHA256 "$T/work/" 2>/dev/null
 cp "$D/.gitattributes" "$T/work/.gitattributes" 2>/dev/null
 mv "$T/work/CERT_SHA256" "$T/work/signing/CERT_SHA256"
 cd "$T/work" || exit 1
-rm -f tools/test_handoff.sh   # the fixture must not recurse into this test via ckpt.sh
+rm -f tools/test_handoff.sh tools/test_intake.sh   # the fixture must not recurse into this test via ckpt.sh (test_intake needs files the fixture does not have)
 git config user.email t@t; git config user.name t
 printf '        versionCode = 1\n        versionName = "0.1.0"\n' > app/build.gradle.kts
 printf '# BUILDLOG\n' > BUILDLOG.md
