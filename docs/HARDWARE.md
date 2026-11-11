@@ -6,7 +6,7 @@ Browser and Launcher repos, that the tablet has **2 GB of RAM**, **no Google Pla
 | Fact | Derived constraint for an optimizer |
 |---|---|
 | MediaTek MT8168B (public specs: quad Cortex-A53, in-order), Mali-G52 MC2 | Slow single-thread performance: anything the optimizer does must be tiny on the CPU; a polling loop is a cost, not a free feature. |
-| Android 10 **Go** (API 29), "modified" build, security patch 2021-07-05, kernel 4.14.141 | `minSdk 29`; newer APIs behind `Build.VERSION.SDK_INT` guards (the APK should still run on Android 16). Go builds run an aggressive low-memory killer and a small cached-process limit. |
+| Android 10 **Go** (API 29), "modified" build, security patch 2021-07-05, kernel 4.14.141 | `minSdk 29`; newer APIs behind `Build.VERSION.SDK_INT` guards (the APK should still run on Android 16). Go builds run an aggressive low-memory killer; whether this ROM also lowers the cached-process limit is unverified (research/FEASIBILITY.md section 2, item 6). |
 | **2 GB RAM** (reports about 1.9 GB), `ro.config.low_ram=true`, memory class **128 MB** | Per-app heap cap 128 MB; no `largeHeap`; keep our own heap well under 25 MB. Free RAM is not the goal; responsiveness is (research/FEASIBILITY.md section 4). |
 | `sys_mssi_t_32_ago` system image | 32-bit userspace (armeabi-v7a). Ship **no native code** so the ABI does not matter. |
 | `ro.boot.flash.locked=1`, secure boot, verified boot green | **No root, no custom ROM, no flashing.** Everything must work from an ordinary app, plus whatever one-time `adb shell pm grant` permissions the owner can give with a cable (TASKS OWNER-2). |
