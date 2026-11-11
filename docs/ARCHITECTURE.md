@@ -8,7 +8,13 @@ One Gradle module, Kotlin, framework Views only, no runtime dependencies beyond 
 | `MemInfo.kt` | Parses `/proc/meminfo` text into a `MemInfo` (kB, -1 = unknown) and formats sizes (`formatKb`) | none (pure JVM, unit-tested) |
 | `ReportText.kt` | `DeviceFacts` + `ReportText.build`: the plain-text snapshot the screen prints and the Copy button copies | none (pure JVM, unit-tested) |
 | `SystemReader.kt` | Reads `ActivityManager`, `Build` and `/proc/meminfo` into `DeviceFacts`; needs no permission | yes (thin glue) |
-| `MainActivity.kt` | Builds the screen in code (title, scrolling monospace report, Refresh, Copy report); refreshes in `onResume` | yes |
+| `Parsers.kt` | `CpuInfo`, `SwapDevice`, `VmStat`: parsers for /proc/cpuinfo, /proc/swaps, /proc/vmstat (an app may not be allowed to read the last two: the report then says why) | none (pure JVM, unit-tested) |
+| `Format.kt` | Sizes, durations, thermal names, animation scales as text | none (pure JVM, unit-tested) |
+| `StorageBench.kt` | The storage speed test: sequential write + fsync and small synced writes on one temporary file in the app's cache (reads are deliberately not timed: the page cache would make them measure RAM) | none (pure java.io, unit-tested) |
+| `StorageModel.kt` | Storage verdict, top apps, row and header text for "What uses my storage" | none (pure JVM, unit-tested) |
+| `StorageReader.kt` | Reads `StorageStatsManager` (totals; per-app and per-kind sizes need the Usage access permission) | yes (thin glue) |
+| `StorageActivity.kt` | "What uses my storage": READ-ONLY list; a tap opens that app's own Android settings page; never deletes anything | yes |
+| `MainActivity.kt` | Builds the screen in code (title, scrolling monospace report, Refresh, Copy report, Storage speed test, What uses my storage); refreshes in `onResume` | yes |
 
 Rule: logic lives in pure classes with a JVM test in `app/src/test`; Activities and services only wire things up. Features that change system state are opt-in, reversible and measured (CLAUDE.md, Engineering rules).
 

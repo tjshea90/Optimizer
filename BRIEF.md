@@ -31,7 +31,7 @@ MediaTek MT8168B "Alps 711" (`tb8168p1_bsp`), Mali-G52 MC2, **Android 10 Go (API
 | Building | GitHub Actions `android.yml`, tags + manual dispatch only | Minutes are scarce; this container only runs tests, lint and debug/release checks. |
 | Signing | PUBLIC dev key `signing/dev/optimizer-dev.jks`, certificate pinned in `signing/CERT_SHA256`; a private key from the repo secrets wins if the owner adds one | Same arrangement the owner chose for Launcher and Browser. Never regenerate once anything is installed. `signing/README.md`. |
 | Identity | `applicationId` and namespace `com.tj.optimizer`, label "Optimizer" | Placeholders until OWNER-1. The id can never change after the first install. |
-| Permissions | none declared | Each addition needs a reason written here. No INTERNET, no GMS. |
+| Permissions | `PACKAGE_USAGE_STATS` only (since v0.3.0) | For "What uses my storage": a special permission the owner switches on once in Settings > Usage access; it lets `StorageStatsManager` report per-app and per-kind SIZES (lint's ProtectedPermissions is acknowledged with `tools:ignore`). Optimizer reads sizes only, never usage events, and never deletes anything. Each further addition needs a reason written here. No INTERNET, no GMS. |
 | Branches | work on the assigned branch; `tools/MIRROR_MAIN` = `off` | Landing on `main` is the owner's call. |
 | Save system | the Browser repo's "save ladder", single-app version | `CLAUDE.md`. |
 | First screen | "device snapshot": RAM, swap, heap class, low-RAM flag, ABIs, with a Copy report button | A seed that yields real numbers for `docs/HARDWARE.md` and proves the signing chain on the tablet. It is NOT a feature decision. |
