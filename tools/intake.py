@@ -159,7 +159,7 @@ def build_facts(sec, source, date, counts):
     if sysctl:
         lines.append("- vm settings: " + ", ".join("%s=%s" % (k, v) for k, v in sorted(sysctl.items())))
     pr = sec.get("pressure", "")
-    lines.append("- Pressure-stall files (/proc/pressure): " + ("present" if "memory:" in pr and "No such file" not in pr else "not available on this kernel (lmkd then uses its older minfree mode)"))
+    lines.append("- Pressure-stall files (/proc/pressure): " + ("present" if re.search(r"^/proc/pressure/memory:", pr, re.M) else "not available on this kernel (lmkd then uses its older minfree mode)"))
     if vm:
         stalls = sum(v for k, v in vm.items() if k.startswith("allocstall"))
         refault = vm.get("workingset_refault", sum(v for k, v in vm.items() if k.startswith("workingset_refault")))
@@ -168,7 +168,8 @@ def build_facts(sec, source, date, counts):
 
     # ---- who uses the memory
     dm = sec.get("dumpsys-meminfo", "")
-    procs = [(to_int(m.group(1)), m.group(2).strip()) for m in re.finditer(r"^\s+([\d,]+)K: (.+?) \(pid \d+", dm, re.M)]
+    blk = re.search(r"Total PSS by process:(.*?)(?:\n\s*Total PSS by OOM adjustment:|\Z)", dm, re.S)
+    procs = [(to_int(m.group(1)), m.group(2).strip()) for m in re.finditer(r"^\s+([\d,]+)K: (.+?) \(pid \d+", blk.group(1) if blk else dm, re.M)]
     totals = {}
     for key in ("Total RAM", "Free RAM", "Used RAM", "Lost RAM", "ZRAM"):
         m = re.search(r"^\s*%s:\s+(.*)$" % re.escape(key), dm, re.M)
@@ -249,7 +250,7 @@ def build_facts(sec, source, date, counts):
         if key:
             lines.append("- Key apps: " + ", ".join("%s=%s" % (p, status[p]) for p in sorted(key)))
         third = [l for l in sec.get("packages-third-party", "").split("\n") if l.startswith("package:")]
-        names = [re.sub(r"^package:.*?=", "", l) for l in third]
+        names = [l.rsplit("=", 1)[-1].strip() for l in third]
         names = [n for n in names if n in status]
         if names:
             bad = [n for n in names if status[n] in ("verify", "quicken", "extract", "run-from-apk", "run-from-vdex-fallback")]
@@ -320,7 +321,10 @@ def main(argv):
     source = os.path.basename(args.report) if args.report != "-" else "standard input"
     dest = next_dir(args.out, args.date)
     os.makedirs(dest)
-    facts = build_facts(sec, source, os.path.basename(dest), counts)
+    try:
+        facts = build_facts(sec, source, os.path.basename(dest), counts)
+    except Exception as e:  # the redacted report is still saved; only the digest is missing
+        facts = "# Tablet survey %s\n\nThe FACTS digest could not be built (%s: %s). Read optimizer-report.txt beside this file.\n" % (os.path.basename(dest), type(e).__name__, e)
     with open(os.path.join(dest, "optimizer-report.txt"), "w", encoding="utf-8") as f:
         f.write(text)
     with open(os.path.join(dest, "FACTS.md"), "w", encoding="utf-8") as f:
