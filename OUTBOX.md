@@ -42,3 +42,20 @@
 >
 > First, did the save system capture your message?
 <!-- sha:649ff672836c -->
+
+## 2026-11-11T22:15:59Z
+> Release v0.1.0 is built and published by GitHub. The run was green and the APK was checked against the pinned signing key:
+>
+> https://github.com/tjshea90/Optimizer/releases/tag/v0.1.0
+>
+> It's only the small device snapshot screen (RAM, swap, heap limit, low-RAM flag, CPU type, plus a Copy report button). There are no optimizing features yet, and it has not been run on your tablet.
+>
+> **What you can do (optional, 2 minutes):** open that page on the tablet, tap `Optimizer-v0.1.0.apk`, install it, open it, tap Copy report and paste it to me. I don't have your tablet's real memory numbers yet. The Launcher repo's tablet captures were taken while its shell helper was off, so they contain almost no RAM or process data.
+>
+> **How your answers changed the work:**
+> - **Goals and the Launcher rule:** I've logged your goals (snappy OS, fast app loading, fast Browser, no animations) and made "nothing may break or interfere with the Launcher" the top rule. So I'm not adding anything that changes the system yet. Two research agents are reading the Launcher and Browser repos right now to build a "never touch" list. One example already known: the Launcher holds the animation settings, so Optimizer must not fight it over them.
+> - **Your adb cable:** since you have one, the safest speed-ups are one-time adb sessions that persist without a background service. Examples are compiling your apps ahead of time and reversible background limits. Each would be dry-run first, undoable, and timed before and after, and nothing is applied without your OK on a specific list.
+> - **Signing key:** it stays public, as you said.
+>
+> I'll come back with the boundary map and a concrete plan for you to approve.
+<!-- sha:1e574cd21588 -->
