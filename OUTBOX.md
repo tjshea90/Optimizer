@@ -36,3 +36,9 @@
 > 4. Is an always-on accessibility service acceptable, or should it only act when you tap a button?
 > 5. Do you want to add a private signing key, and should I publish the first release (v0.1.0) when you say so?
 <!-- sha:d321a65490c5 -->
+
+## 2026-11-11T22:09:29Z
+> Your answers are in. Summary of what I'm doing, in order: record them first (so nothing is lost if I'm cut off), then **have GitHub build the v0.1.0 release** as you asked, and while that builds, dig into the Launcher and Browser repos so the optimizer can't clash with your custom launcher setup.
+>
+> First, did the save system capture your message?
+<!-- sha:649ff672836c -->
