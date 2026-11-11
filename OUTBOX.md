@@ -92,3 +92,31 @@
 > - The survey commands and their output parsing are written from Android 10 knowledge and a made-up sample file; the first real report may need parser fixes. The Windows `.bat` has never run on Windows.
 > - Nothing that changes your tablet is applied yet. After the data arrives I'll propose specific, reversible changes with before-and-after timings, one list at a time, for your approval. Candidates are compiling apps ahead of time, a DuraSpeed on-versus-off test, and background limits for apps you name.
 <!-- sha:5a6bcac12868 -->
+
+## 2026-11-11T23:07:25Z
+> Your report shows your tablet's storage is 97% full, with 996 MB free of 27.75 GB. The app ran fine on the tablet, and this is the first real data we have.
+>
+> **What the numbers say:**
+> - **Storage:** the speed test shows the flash itself is healthy (31 MB/s writes, 1.7 ms small synced writes), so I can't yet prove the full storage is what makes it sluggish. It still leaves no room for updates and caches. It probably also explains the trouble installing Browser updates.
+> - **Swap:** 621 MB of 1.72 GB is in use. I can't tell if that's compressed RAM or on the flash, because Android 10 hides that from apps. The PC survey will show it.
+> - **Uptime and memory:** 6 days up, which is long for 2 GB. RAM looked healthy at that moment (691 MB available), and heat was fine.
+>
+> **New:** v0.3.1 adds a "What uses my storage" screen. It lists the apps using the most space and the totals for pictures, video and audio. Tapping an app opens its own Android settings page. It only reads, and never deletes or clears anything. v0.3.0 was published a few minutes earlier, so skip it.
+>
+> https://github.com/tjshea90/Optimizer/releases/tag/v0.3.1
+>
+> **To do, in one sitting:**
+> 1. Install v0.3.1 over what you have.
+> 2. Open Optimizer, tap **What uses my storage**, tap **Switch on Usage access**, turn Optimizer on, and go back. It takes about 30 seconds to read all the apps.
+> 3. Tap **Copy list** and paste it to me. Then we decide together what to clear.
+>
+> One quick guess to check: each Browser alpha installer is about 92 MB, so old ones in Downloads could add up to around 1 GB.
+>
+> I extended the PC survey to say what fills the storage, with names of non-Optimizer installer files hidden. It's optional, but it would also settle the swap question. Run it while the tablet feels slow.
+>
+> Two other things:
+> - Your Browser sessions' update-space notes assumed a 16 GB tablet. Yours is 27.75 GB with 3% free, so please pass that on to them.
+> - v0.3.1 hasn't run on your tablet yet, so tell me if the new screen misbehaves.
+>
+> Still open from before, none blocking: whether to keep the Launcher's animation rule as is, and whether `main` should become the default branch.
+<!-- sha:b2f888f2a351 -->
