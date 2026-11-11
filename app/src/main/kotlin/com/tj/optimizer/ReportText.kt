@@ -61,6 +61,8 @@ object ReportText {
         }
         if (f.swaps.isNotEmpty()) {
             appendLine("Swap device:    " + f.swaps.joinToString(", ") { it.name + if (it.isZram) " (zram)" else "" })
+        } else if (m != null && m.swapTotalKb > 0) {
+            appendLine("Swap device:    n/a (Android 10 does not let apps read /proc/swaps; the PC survey can)")
         }
         appendMemoryPressure(f)
         appendLine()
@@ -70,7 +72,8 @@ object ReportText {
         if (f.selfPssKb >= 0) appendLine("This app now: ${formatKb(f.selfPssKb.toLong())} (PSS)")
         appendLine()
         val dataPct = if (f.dataTotalBytes > 0 && f.dataFreeBytes >= 0) " (${f.dataFreeBytes * 100 / f.dataTotalBytes}%)" else ""
-        appendLine("Storage (data): ${formatBytes(f.dataFreeBytes)} free of ${formatBytes(f.dataTotalBytes)}$dataPct")
+        val word = StorageModel.warningWord(f.dataTotalBytes, f.dataFreeBytes)
+        appendLine("Storage (data): ${formatBytes(f.dataFreeBytes)} free of ${formatBytes(f.dataTotalBytes)}$dataPct" + if (word.isEmpty()) "" else " - $word")
         if (f.appsTotal >= 0) appendLine("Apps installed: ${f.appsTotal} (${f.appsSystem} system, ${f.appsTotal - f.appsSystem} added)")
         appendLine(
             "Animation scales (window / transition / animator): ${formatScale(f.animWindow)} / ${formatScale(f.animTransition)} / ${formatScale(f.animAnimator)}" +
@@ -83,7 +86,7 @@ object ReportText {
     private fun StringBuilder.appendMemoryPressure(f: DeviceFacts) {
         val vm = f.vm
         if (vm == null) {
-            appendLine("Memory-pressure counters: n/a")
+            appendLine("Memory-pressure counters: n/a (Android 10 does not let apps read /proc/vmstat; the PC survey can)")
             return
         }
         fun n(v: Long) = if (v < 0) "n/a" else v.toString()

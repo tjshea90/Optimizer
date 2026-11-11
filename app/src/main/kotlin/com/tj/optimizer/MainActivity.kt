@@ -3,6 +3,7 @@ package com.tj.optimizer
 import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.util.TypedValue
@@ -57,6 +58,10 @@ class MainActivity : Activity() {
             text = getString(R.string.storage_test)
             setOnClickListener { runBench() }
         }
+        val storageButton = Button(this).apply {
+            text = getString(R.string.storage_button)
+            setOnClickListener { startActivity(Intent(this@MainActivity, StorageActivity::class.java)) }
+        }
         // 56 dp tall: comfortable to hit on a 600x973 @170 dpi tablet at font scale 1.2
         fun rowOf(vararg buttons: Button) = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -69,6 +74,7 @@ class MainActivity : Activity() {
             addView(scroll, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f).apply { topMargin = dp(12) })
             addView(rowOf(refresh, copy))
             addView(rowOf(benchButton))
+            addView(rowOf(storageButton))
         }
         setContentView(root)
     }

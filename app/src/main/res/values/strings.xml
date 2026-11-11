@@ -5,4 +5,10 @@
     <string name="copy_report">Copy report</string>
     <string name="copied">Report copied</string>
     <string name="storage_test">Storage speed test</string>
+    <string name="storage_button">What uses my storage</string>
+    <string name="storage_title">What uses my storage</string>
+    <string name="storage_reading">Reading app sizes, about 10 to 60 seconds ...</string>
+    <string name="storage_hint">Tap an app to open its Android settings page. There, Storage &gt; Clear cache is the safe way to free space. Do not clear an app\'s data unless you know why: that removes its settings and logins. Optimizer never deletes anything itself.</string>
+    <string name="grant_usage_access">Switch on Usage access for Optimizer</string>
+    <string name="settings_unavailable">This settings page is not available on this tablet</string>
 </resources>

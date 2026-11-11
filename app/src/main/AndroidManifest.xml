@@ -2,7 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- No permissions yet, on purpose: every permission is added only when a feature needs it, with the reason written in BRIEF.md. -->
+    <!-- Every permission is added only when a feature needs it, with the reason written in BRIEF.md. This one is for "What uses my storage": a special
+         permission the owner switches on in Settings > Usage access, which lets StorageStatsManager report per-app and per-kind SIZES. Optimizer never reads usage. -->
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
 
     <application
         android:allowBackup="false"
@@ -22,5 +24,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".StorageActivity"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation"
+            android:exported="false" />
     </application>
 </manifest>
