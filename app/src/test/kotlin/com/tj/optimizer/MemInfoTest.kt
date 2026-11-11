@@ -78,7 +78,7 @@ class MemInfoTest {
         assertTrue(text, text.contains("RAM available:  696 MB (36%)"))
         assertTrue(text, text.contains("Swap used:      143 MB of 512 MB"))
         assertTrue(text, text.contains("Low-RAM (Go) device: true"))
-        assertTrue(text, text.contains("CPU ABIs: armeabi-v7a, armeabi"))
+        assertTrue(text, text.contains("ABIs armeabi-v7a, armeabi"))
         val noMem = ReportText.build(DeviceFacts("0.1.0", "10", 29, "?", "x", emptyList(), false, 128, 256, false, 0, null))
         assertTrue(noMem, noMem.contains("could not be read"))
     }
