@@ -1,22 +1,22 @@
-# CHECKPOINT 94 — read me first, then TASKS.md
+# CHECKPOINT 99 — read me first, then TASKS.md
 
-**Written:** 2026-11-11T22:51:20Z · **tests:** all 2 fast checks green (gradle suite: see ship.sh)
-**Branch:** `ccr-726a5950-fnv7m9` · **builds on:** `03212a2` (this checkpoint is the commit after it)
+**Written:** 2026-11-11T22:53:50Z · **tests:** all 2 fast checks green (gradle suite: see ship.sh)
+**Branch:** `ccr-726a5950-fnv7m9` · **builds on:** `16c8738` (this checkpoint is the commit after it)
 
 ## Just done
-The owner pasted the v0.2.0 Copy report: first real run on the tablet (installed, no crash). Saved verbatim in research/tablet/2026-11-11-app-report-v0.2.0.txt and analysed in research/BASELINE_2026-11-11.md. Headline: data partition 27.75 GB with only 996 MB (3%) free; swap 621 MB used of 1.72 GB (type unknown, apps cannot read /proc/swaps or /proc/vmstat on this ROM); flash itself is fine (31.3 MB/s write, 4 KB synced write 1.74 ms); RAM healthy at that moment (691 MB available); uptime 6 days; CPU has crypto extensions. docs/HARDWARE.md updated. TASKS: RPT-1 ticked, ST1-ST4 added (storage is now lever 1).
+ST1 done: the PC survey now also answers what fills the storage. 50 read-only commands (added dumpsys diskstats, du -sk of a fixed list of shared folders, ls -l of Download/*.apk, F2FS free/dirty/lifetime-write counters, eMMC life_time/pre_eol_info). tools/intake.py masks installer file names that are not the owner's own app builds (public repo), digests kinds / biggest apps / shared folders / installers with a red flag. Fixture extended, tools/test_intake.sh 19/19 (allow-list widened for exactly those five commands). Owner guide updated.
 
 ## Do this next
-ST1 then ST2. ST1: add to tools/adb/intake-commands.txt (and the allow-list in tools/test_intake.sh + digest in tools/intake.py): 'dumpsys diskstats', 'du -sk' of a FIXED list of top-level shared folders (Download DCIM Pictures Movies Music Documents Android/data Android/media), 'ls -l /sdcard/Download/*.apk' (installer names/sizes only, no other file names: the repo is public), f2fs segment counters; keep the fixture + tests green. ST2: v0.3.0 StorageActivity (StorageStatsManager, PACKAGE_USAGE_STATS with tools:ignore=ProtectedPermissions, pure StorageModel with JVM tests), BRIEF.md permission reason, ship via ship.sh. Then reply to the owner.
+ST2: v0.3.0 in-app 'What uses my storage' (read-only). Plan: AndroidManifest add <uses-permission android:name=android.permission.PACKAGE_USAGE_STATS tools:ignore=ProtectedPermissions/> + StorageActivity (exported=false); pure app/src/main/kotlin/com/tj/optimizer/StorageModel.kt (sort, top-N, totals, verdict text, formatting) with JVM tests; StorageReader.kt (StorageStatsManager.getTotalBytes/getFreeBytes/queryExternalStatsForUser/queryStatsForPackage per installed app, off the UI thread, each call guarded; SecurityException = no Usage access yet -> show a button to Settings.ACTION_USAGE_ACCESS_SETTINGS); tap a row -> Settings.ACTION_APPLICATION_DETAILS_SETTINGS for that package (the owner clears cache there); NEVER delete anything. Main screen: button + a storage verdict line; report says WHY memory counters/swap device are n/a. BRIEF.md: record the permission and its reason. Version 0.3.0 (code 3), ship.sh, dispatch, record.
 
 *(resuming? CLAUDE.md's "FIRST ACTION OF EVERY SESSION" says how; the briefing is tools/resume.sh. Do that first, or autosave may stay off all session.)*
 
 ## Uncommitted right now
-     M TASKS.md
-     M docs/HARDWARE.md
+    (nothing — the tree is clean as of this checkpoint)
 
 ## Last ten checkpoints
 ```
+  57c2a4e ckpt 94: The owner pasted the v0.2.0 Copy report: first real run on the tablet (installe
   b3a27aa ckpt 89: P1 done: the PC-side read-only survey kit. tools/adb/intake-commands.txt (45 re
   8d54b58 ckpt 72: Release v0.2.0 DISPATCHED: Actions run 43112944089 (android.yml run_number 3) a
   e53d58a ckpt 71: gated v0.2.0 (code 2) and pushed it: handoff self-test, unit tests and the vers
@@ -26,7 +26,6 @@ ST1 then ST2. ST1: add to tools/adb/intake-commands.txt (and the allow-list in t
   e928075 ckpt 47: Release v0.1.0 DISPATCHED on GitHub Actions: run 43109636536 (android.yml run_n
   1df73c8 ckpt 46: gated v0.1.0 (code 1) and pushed it: handoff self-test, unit tests and the vers
   a3ce2ec ckpt 45: Recorded the owner's answers (INBOX hook captured the message verbatim and push
-  a203193 ckpt 40: CI proven end to end: Actions run 43103221429 GREEN (check 20 s + build 2m52s: 
 ```
 
 (4 automatic checkpoint(s) since the last deliberate one — the
