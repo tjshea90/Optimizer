@@ -18,16 +18,27 @@ building like my other reps. This repo will be an app to optimize ram and proces
 - [ ] I9 Tell the owner what was set up, what was and was not verified, and the OWNER items below
 
 ## OWNER decisions / actions (nothing here blocks the infrastructure; most block the first real feature)
-- [ ] OWNER-1 App name + package: placeholder label "Optimizer", `applicationId` `com.tj.optimizer` (same style as com.tj.launcher). The id can never change once installed - say if you want another before the first install
-- [ ] OWNER-2 Can you use a PC with a USB cable for one-time `adb shell pm grant ...` permissions on the tablet? (Launcher asked the same: its "one-cable recipe"). Decides how much of research/FEASIBILITY.md is reachable
-- [ ] OWNER-3 What does "best speed" mean to you: app launch time, scrolling/UI smoothness, the Browser, everything after a long uptime? Which apps are the heavy ones you notice?
-- [ ] OWNER-4 Is an always-on accessibility service acceptable (Launcher already uses one), or should the optimizer only act when you tap a button (default: on demand, because a resident service costs RAM on a 2 GB tablet)?
-- [ ] OWNER-5 Optional: a PRIVATE signing key in the repo secrets instead of the public dev key (steps in signing/README.md); optional: make `main` the default branch and set `tools/MIRROR_MAIN` to `on`
-- [ ] OWNER-6 First release: say when to publish v0.1.0 (the skeleton "device snapshot" screen) so the signing chain is proven on the real tablet; nothing is published until you say so
+- [x] OWNER-1 App name + package: ANSWERED 2026-11-11 22:08Z "the name is fine" -> label "Optimizer", applicationId `com.tj.optimizer` stay
+- [x] OWNER-2 USB cable + PC for one-time `adb shell pm grant` / adb sessions: ANSWERED "yes" (2026-11-11 22:08Z). Levels 3 (adb grants) and the one-time-adb-session approach of research/FEASIBILITY.md are available
+- [x] OWNER-3 What "best speed" means: ANSWERED "I like the os to feel snappy, not sluggish. Fast app loading, fast browser that Claude is building in another repo, no animations, etc. But without breaking anything with my custom launcher setup from the launcher repo" -> goals G1
+- [x] OWNER-4 Accessibility service: ANSWERED "anything is fine as long as it doesn't break anything on my tablet or interfere with the custom launcher" -> allowed IF it provably cannot break the tablet or interfere with the Launcher (G2 boundary map first; still prefer no resident service: RAM)
+- [x] OWNER-5 Signing key: ANSWERED "I don't care if it is public" -> the committed public dev key stays (signing/README.md); no private key needed
+- [x] OWNER-6 First release: ANSWERED "Have github build the release" (2026-11-11 22:08Z) -> REL-1 below
+
+- [ ] OWNER-7 Optional, still open: make `main` the default branch and set `tools/MIRROR_MAIN` to `on` (today the default branch is the first session branch ccr-726a5950-fnv7m9). Not blocking; ask only when it matters
+
+## Owner request 2, 2026-11-11 22:08Z (verbatim in INBOX.md) - the owner's answers to my five questions
+> "1) the name is fine 2)yes 3) I like the os to feel snappy, not sluggish. Fast app loading, fast browser that Claude is building in another repo, no animations, etc. But without breaking anything with my custom launcher setup from the launcher repo
+> 4) anything is fine as long as it doesn't break anything on my tablet or interfere with the custom launcher 5) I don't care if it is public. Have github build the release"
+- [ ] REL-1 Have GitHub build and PUBLISH release v0.1.0 (the device-snapshot skeleton): `bash ship.sh "note"` -> dispatch android.yml full_build=true publish=true -> verify the Release has the APK + sha256 -> `bash tools/record-release.sh v0.1.0 "note"` -> give the owner the Release link as plain text
+- [ ] G1 GOAL: the tablet feels snappy, not sluggish: fast app loading, a fast Browser (Kestrel, built in the owner's Browser repo), no animations, "etc." - and NOTHING may break or interfere with the custom launcher setup from the Launcher repo. The Launcher repo's safety rules override every Optimizer feature
+- [ ] G2 Boundary map BEFORE any feature that changes system state: from the Launcher and Browser repos list every setting, appop, package state, service and process they own or depend on (e.g. the Launcher's AnimationSpeedup holds the animation scales; its helper/accessibility service; battery-saver policy) and write an explicit "Optimizer never touches / must coordinate" list in research/BOUNDARIES.md
+- [ ] G3 Prefer improvements that PERSIST without a resident process (one-time adb sessions from the owner's PC: AOT compile of the apps they use, background restrictions, reversible parking of unused preinstalled apps), each with an undo and a before/after measurement; the in-app part stays small
+- [ ] G4 Measure first: a repeatable cold-start / responsiveness baseline for the apps the owner uses (Launcher, Browser, Settings...) so "snappier" is a number, several runs each, before any change
 
 ## Request 1b - the app: optimize RAM and processes on the MT8168 Android 10 Go tablet for the best speed possible (feature list NOT written yet)
 - [ ] R1 Research: what an ordinary (non-root, locked-bootloader) Android 10 app can do for RAM/process speed at each privilege level - `research/FEASIBILITY.md` holds the unverified starting hypotheses; verify against the Android 10 source (android-10.0.0_r47, as Launcher did) and write the findings there
-- [ ] R2 Read the Launcher and Browser repos' notes on what this tablet allowed (adb helper, accessibility, grants) so nothing is re-derived: Launcher `HANDOFF.md` / `CLAUDE.md`, Browser `docs/HARDWARE.md`
+- [~] R2 Read the Launcher and Browser repos' notes on what this tablet allowed (adb helper, accessibility, grants) so nothing is re-derived: Launcher `HANDOFF.md` / `CLAUDE.md`, Browser `docs/HARDWARE.md` {ccr-726a5950-fnv7m9 2026-11-11T22:09Z}
 - [ ] R3 Baseline first: the skeleton's snapshot screen (RAM total/available, swap, heap class, low-RAM flag, ABIs) installed on the tablet, owner pastes the "Copy report" text back; real numbers go into docs/HARDWARE.md
 - [ ] R4 Design the feature list with the owner from R1 + OWNER-2/3/4, then write each feature here as `[ ]` boxes with a test that proves it
 
