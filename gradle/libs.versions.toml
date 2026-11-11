@@ -1,0 +1,12 @@
+# Toolchain pinned to the versions proven in the owner's Browser and Launcher repos. Upgrade deliberately (BRIEF.md), never because lint says a newer one exists.
+[versions]
+agp = "8.13.2"
+kotlin = "2.3.10"
+junit = "4.13.2"
+
+[libraries]
+junit = { module = "junit:junit", version.ref = "junit" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
