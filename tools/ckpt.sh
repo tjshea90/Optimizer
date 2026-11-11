@@ -193,12 +193,16 @@ fi
 if git diff --cached --quiet 2>/dev/null; then
   echo "  ckpt $N: nothing changed on disk — no commit made"
 else
+  # Attribution trailer. Default: a plain Claude co-author line. A session whose harness asks for specific attribution lines (for example a
+  # Claude-Session link) writes them to .git/ckpt-trailer once; that file is untracked, so it never reaches GitHub or another session.
+  TRAILER="Co-Authored-By: Claude <noreply@anthropic.com>"
+  [ -s .git/ckpt-trailer ] && TRAILER="$(cat .git/ckpt-trailer)"
   git commit -q -m "ckpt $N: $DID
 
 next: ${NEXT:-see TASKS.md}
 tests: $TESTS
 
-Co-Authored-By: Claude <noreply@anthropic.com>" >/dev/null 2>&1
+$TRAILER" >/dev/null 2>&1
   echo "  ckpt $N committed · $TESTS"
 fi
 [ "$FAIL" -gt 0 ] && echo "  NOTE: red suites recorded, not hidden:$REDS"

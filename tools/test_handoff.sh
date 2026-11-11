@@ -176,15 +176,15 @@ bash tools/ckpt.sh "did two" "do three" >/dev/null 2>&1
 N2="$(sed -n '1s/^# CHECKPOINT \([0-9]*\).*/\1/p' CHECKPOINT.md)"
 check "ckpt numbers only go up"  '[ "${N2:-0}" -gt "${N1:-99}" ]'
 check "ckpt pushed everything"   '[ "$(bash tools/unpushed.sh)" = 0 ]'
+
+# ---------------------------------------------------------------- resume: briefing, interruption, stranded branch
+OUT="$(bash tools/resume.sh --text 2>&1)"
+check "resume prints CHECKPOINT + open task" 'printf "%s" "$OUT" | grep -q "do three" && printf "%s" "$OUT" | grep -q "first task"'
+check "resume reports a clean state (no interruption warning)" '! printf "%s" "$OUT" | grep -q "INTERRUPTED MID-CHANGE"'
 printf 'Co-Authored-By: Someone <s@example.invalid>\nClaude-Session: https://example.invalid/s/1\n' > .git/ckpt-trailer
 bash tools/ckpt.sh "trailer test" "n" >/dev/null 2>&1
 check "ckpt appends the optional .git/ckpt-trailer attribution instead of the default one" 'git log -1 --format=%B | grep -q "^Claude-Session: https://example.invalid/s/1$" && ! git log -1 --format=%B | grep -q "^Co-Authored-By: Claude <"'
 rm -f .git/ckpt-trailer
-
-# ---------------------------------------------------------------- resume: briefing, interruption, stranded branch
-OUT="$(bash tools/resume.sh --text 2>&1)"
-check "resume prints CHECKPOINT + open task" 'printf "%s" "$OUT" | grep -q "n$" && printf "%s" "$OUT" | grep -q "first task"'
-check "resume reports a clean state (no interruption warning)" '! printf "%s" "$OUT" | grep -q "INTERRUPTED MID-CHANGE"'
 echo wip > b.txt; bash tools/autosave.sh --text >/dev/null
 OUT="$(bash tools/resume.sh --text 2>&1)"
 check "resume flags an interrupted session"  'printf "%s" "$OUT" | grep -q "INTERRUPTED MID-CHANGE"'
