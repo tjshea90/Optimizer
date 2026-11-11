@@ -55,6 +55,17 @@ object StorageModel {
     /** Second line of an app row: "2.23 GB: code 40 MB, data 2.00 GB, cache 200 MB". */
     fun rowDetail(a: AppStorage): String = "${formatBytes(a.totalBytes)}: code ${formatBytes(a.appBytes)}, data ${formatBytes(a.dataBytes)}, cache ${formatBytes(a.cacheBytes)}"
 
+    /** The whole screen as plain text for the Copy button: the header, then the [topN] biggest apps with their package names. */
+    fun copyText(s: StorageSummary, topN: Int): String = buildString {
+        appendLine(header(s))
+        val top = topApps(s.apps, topN)
+        if (top.isNotEmpty()) {
+            appendLine()
+            appendLine("Biggest apps (code + data + cache):")
+            for ((i, a) in top.withIndex()) appendLine("${i + 1}. ${a.label} (${a.packageName}) ${rowDetail(a)}")
+        }
+    }.trimEnd()
+
     /** The text block above the list: the verdict, the totals per kind and what the counted apps add up to. */
     fun header(s: StorageSummary): String = buildString {
         appendLine(verdict(s.totalBytes, s.freeBytes))
