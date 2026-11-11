@@ -63,6 +63,17 @@ class StorageModelTest {
     }
 
     @Test
+    fun theCopiedTextHasTheHeaderAndTheBiggestAppsWithTheirPackageNames() {
+        val s = StorageSummary(total, free, apps = listOf(app("small", 1, 1, 1), app("com.example.chat", mb(40), gb(2.0), mb(200))))
+        val t = StorageModel.copyText(s, 5)
+        assertTrue(t, t.startsWith("VERY LOW: 996 MB free of 27.75 GB (3%)"))
+        assertTrue(t, t.contains("Biggest apps (code + data + cache):"))
+        assertTrue(t, t.contains("1. COM.EXAMPLE.CHAT (com.example.chat) 2.23 GB: code 40 MB, data 2.00 GB, cache 200 MB"))
+        assertTrue(t, t.indexOf("COM.EXAMPLE.CHAT") < t.indexOf("SMALL"))
+        assertFalse(t, StorageModel.copyText(StorageSummary(total, free), 5).contains("Biggest apps"))
+    }
+
+    @Test
     fun withoutUsageAccessTheHeaderSaysSoInsteadOfInventingNumbers() {
         val h = StorageModel.header(StorageSummary(total, free, needsUsageAccess = true))
         assertTrue(h, h.contains("Usage access"))

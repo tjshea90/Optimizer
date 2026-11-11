@@ -21,8 +21,8 @@ android {
         applicationId = "com.tj.optimizer"
         minSdk = 29            // the tablet is Android 10 (API 29); anything newer must be guarded with Build.VERSION.SDK_INT
         targetSdk = 29         // = the real device's runtime, so no newer-Android behaviour is assumed (BRIEF.md); also keeps every package visible on Android 11+
-        versionCode = 3
-        versionName = "0.3.0"
+        versionCode = 4
+        versionName = "0.3.1"
     }
 
     signingConfigs {
