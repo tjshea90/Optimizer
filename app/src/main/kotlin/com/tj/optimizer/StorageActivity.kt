@@ -28,7 +28,9 @@ import android.widget.Toast
 class StorageActivity : Activity() {
     private lateinit var header: TextView
     private lateinit var accessButton: Button
+    private lateinit var copyButton: Button
     private lateinit var rows: LinearLayout
+    private var lastSummary: StorageSummary? = null
     private var loading = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
