@@ -1,0 +1,62 @@
+# intake-commands.txt - the ONLY commands tools/adb/intake.sh and intake.bat run on the tablet. READ-ONLY by construction:
+# tools/test_handoff.sh fails the build if any line here is not on its read-only allow-list (cat, grep, getprop, ps, top, df, date, wm size/density,
+# a few dumpsys services, pm list, cmd appops query-op, settings get/list), or uses > < ; & backticks $( " % ^ !  (those would write, chain or break the Windows runner).
+# Format:  label|command   (a pipe INSIDE the command is fine, only the first | splits; use single quotes, never double quotes).
+# Lines starting with # and blank lines are ignored.
+
+# --- identity and time
+time|date
+uptime|cat /proc/uptime
+kernel|cat /proc/version
+props|getprop
+
+# --- cpu, thermal, gpu, display
+cpuinfo|cat /proc/cpuinfo
+cpu-online|cat /sys/devices/system/cpu/online
+cpufreq-cpu0|grep -H . /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors
+thermal-zones|grep -H . /sys/class/thermal/thermal_zone*/type /sys/class/thermal/thermal_zone*/temp
+thermalservice|dumpsys thermalservice
+gpu|dumpsys SurfaceFlinger | grep -i -E 'GLES|Mali|PowerVR|EGL'
+display|dumpsys display | grep -i -E 'fps|mode|density|refresh'
+wm-size|wm size
+wm-density|wm density
+
+# --- memory
+meminfo|cat /proc/meminfo
+swaps|cat /proc/swaps
+vmstat|cat /proc/vmstat
+buddyinfo|cat /proc/buddyinfo
+pressure|grep -H . /proc/pressure/memory /proc/pressure/io /proc/pressure/cpu
+zram|grep -H . /sys/block/zram0/disksize /sys/block/zram0/comp_algorithm /sys/block/zram0/mm_stat /sys/block/zram0/stat
+vm-sysctl|grep -H . /proc/sys/vm/swappiness /proc/sys/vm/min_free_kbytes /proc/sys/vm/extra_free_kbytes /proc/sys/vm/vfs_cache_pressure /proc/sys/vm/dirty_ratio /proc/sys/vm/dirty_background_ratio /proc/sys/vm/page-cluster
+loadavg|cat /proc/loadavg
+dumpsys-meminfo|dumpsys meminfo
+activity-oom|dumpsys activity oom
+activity-lru|dumpsys activity lru
+procstats|dumpsys procstats --hours 3
+ps|ps -A -o PID,PPID,RSS,VSZ,NI,STAT,NAME
+top|top -b -n 1 -m 25
+
+# --- compile state, packages, background rules
+dexopt|dumpsys package dexopt
+packages-disabled|pm list packages -d
+packages-third-party|pm list packages -3 -f
+packages-system|pm list packages -s
+deviceidle-whitelist|dumpsys deviceidle whitelist
+appops-bg-ignore|cmd appops query-op RUN_ANY_IN_BACKGROUND ignore
+appops-bg-deny|cmd appops query-op RUN_ANY_IN_BACKGROUND deny
+
+# --- settings that matter for speed (the Launcher owns the animation scales and battery saver: we only READ them)
+anim-window|settings get global window_animation_scale
+anim-transition|settings get global transition_animation_scale
+anim-animator|settings get global animator_duration_scale
+duraspeed-global|settings get global setting.duraspeed.enabled
+duraspeed-system|settings get system setting.duraspeed.enabled
+activity-manager-constants|settings get global activity_manager_constants
+speed-keys-global|settings list global | grep -i -E 'duraspeed|anim|power|standby|background|ram_|memory|boost|perf|cache|lmk|oom'
+speed-keys-system|settings list system | grep -i -E 'duraspeed|anim|power|standby|background|ram_|memory|boost|perf|cache|lmk|oom'
+
+# --- storage
+df|df -h
+mounts|cat /proc/mounts
+emmc-queue|grep -H . /sys/block/mmcblk0/queue/read_ahead_kb /sys/block/mmcblk0/queue/scheduler /sys/block/mmcblk0/queue/nr_requests
