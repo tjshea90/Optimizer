@@ -264,4 +264,51 @@ Filesystem       Size  Used Avail Use% Mounted on
 /sys/block/mmcblk0/queue/read_ahead_kb:128
 /sys/block/mmcblk0/queue/scheduler:noop deadline [cfq]
 /sys/block/mmcblk0/queue/nr_requests:128
+
+##### diskstats
+Latency: 5ms [512B Data Write]
+Recent Disk Write Speed (kB/s) = 28123
+Data-Free: 1010912K / 29094868K total = 3% free
+Cache-Free: 123456K / 234567K total = 52% free
+System-Free: 1234K / 2097152K total = 0% free
+File-based Encryption: false
+App Size: 6442450944
+App Data Size: 9663676416
+App Cache Size: 2147483648
+Photos Size: 1073741824
+Videos Size: 3221225472
+Audio Size: 536870912
+Downloads Size: 2147483648
+System Size: 2415919104
+Other Size: 1073741824
+Package Names: ["app.kestrel.browser.gecko","com.example.chat","com.example.game","com.tj.launcher"]
+App Sizes: [96468992,41943040,314572800,10485760]
+App Data Sizes: [734003200,2147483648,104857600,5242880]
+Cache Sizes: [536870912,209715200,52428800,1048576]
+
+##### du-shared
+2201456	/sdcard/Download
+1048576	/sdcard/DCIM
+524288	/sdcard/Pictures
+3145728	/sdcard/Movies
+524288	/sdcard/Music
+10240	/sdcard/Documents
+1572864	/sdcard/Android/data
+20480	/sdcard/Android/media
+
+##### download-apks
+-rw-rw---- 1 root sdcard_rw 96468992 2026-11-10 12:34 /sdcard/Download/kestrel-g-0.2.0-alpha9.apk
+-rw-rw---- 1 root sdcard_rw 96468992 2026-11-11 08:01 /sdcard/Download/kestrel-g-0.2.0-alpha10.apk
+-rw-rw---- 1 root sdcard_rw 209715200 2026-10-01 09:00 /sdcard/Download/SecretHobbyApp.apk
+-rw-rw---- 1 root sdcard_rw 28154 2026-11-11 21:00 /sdcard/Download/Optimizer-v0.1.0.apk
+
+##### f2fs
+/sys/fs/f2fs/dm-3/free_segments:123
+/sys/fs/f2fs/dm-3/dirty_segments:456
+/sys/fs/f2fs/dm-3/lifetime_write_kbytes:987654321
+
+##### emmc-health
+/sys/class/mmc_host/mmc0/mmc0:0001/life_time:0x01 0x01
+/sys/class/mmc_host/mmc0/mmc0:0001/pre_eol_info:0x01
+/sys/class/mmc_host/mmc0/mmc0:0001/name:DF4064
 ##### end
