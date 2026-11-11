@@ -298,7 +298,7 @@ def next_dir(base, date):
 def main(argv):
     ap = argparse.ArgumentParser(description="Save the tablet survey into the project, redacted.")
     ap.add_argument("report", help="optimizer-report.txt, or - for standard input")
-    ap.add_argument("--date", default=datetime.datetime.utcnow().strftime("%Y-%m-%d"))
+    ap.add_argument("--date", default=datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d"))
     ap.add_argument("--out", default=os.path.join("research", "tablet"))
     args = ap.parse_args(argv)
     if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", args.date):
