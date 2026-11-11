@@ -60,3 +60,10 @@ speed-keys-system|settings list system | grep -i -E 'duraspeed|anim|power|standb
 df|df -h
 mounts|cat /proc/mounts
 emmc-queue|grep -H . /sys/block/mmcblk0/queue/read_ahead_kb /sys/block/mmcblk0/queue/scheduler /sys/block/mmcblk0/queue/nr_requests
+
+# --- what fills the storage (sizes only; the repo is public, so tools/intake.py masks file names that are not the owner's own app builds)
+diskstats|dumpsys diskstats
+du-shared|du -sk /sdcard/Download /sdcard/DCIM /sdcard/Pictures /sdcard/Movies /sdcard/Music /sdcard/Documents /sdcard/Android/data /sdcard/Android/media
+download-apks|ls -l /sdcard/Download/*.apk
+f2fs|grep -H . /sys/fs/f2fs/*/free_segments /sys/fs/f2fs/*/dirty_segments /sys/fs/f2fs/*/lifetime_write_kbytes
+emmc-health|grep -H . /sys/class/mmc_host/mmc0/mmc0:*/life_time /sys/class/mmc_host/mmc0/mmc0:*/pre_eol_info /sys/class/mmc_host/mmc0/mmc0:*/name /sys/class/mmc_host/mmc0/mmc0:*/rev /sys/class/mmc_host/mmc0/mmc0:*/fwrev

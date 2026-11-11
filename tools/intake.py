@@ -12,6 +12,7 @@ and <out>/LATEST.md = the newest FACTS.md. The input is untrusted data: nothing 
 import argparse
 import collections
 import datetime
+import json
 import os
 import re
 import sys
@@ -41,6 +42,25 @@ def redact(text):
         if n:
             counts[kind] = n
     return text, counts
+
+
+SAFE_INSTALLER = re.compile(r"^(kestrel|optimizer|launcher|linkmeter|portfolio)", re.I)
+
+
+def mask_download_names(text):
+    """In the `download-apks` section keep sizes and dates but replace every installer file name that is not one of the owner's own app builds with <file>.apk.
+    -> (text, number of names masked)."""
+    out, section, masked = [], None, 0
+    for line in text.split("\n"):
+        if line.startswith("##### "):
+            section = line[6:].strip()
+        elif section == "download-apks":
+            m = re.match(r"^(.*?)(/sdcard/Download/)([^/\s].*?)(\.apk)\s*$", line, re.I)
+            if m and not SAFE_INSTALLER.match(m.group(3)):
+                line = m.group(1) + m.group(2) + "<file>" + m.group(4)
+                masked += 1
+        out.append(line)
+    return "\n".join(out), masked
 
 
 # ---------------------------------------------------------------- parsing
@@ -230,6 +250,55 @@ def build_facts(sec, source, date, counts):
     if gpu:
         lines.append("- GPU: " + " | ".join(gpu[:2]))
 
+    # ---- what fills the storage
+    ds = sec.get("diskstats", "")
+    st = []
+    m = re.search(r"Data-Free:\s*(\d+)K\s*/\s*(\d+)K total\s*=\s*(\d+)% free", ds)
+    if m:
+        st.append("- diskstats says /data: %s free of %s (%s%%)" % (human_kb(int(m.group(1))), human_kb(int(m.group(2))), m.group(3)))
+    kinds = []
+    for key in ("App Size", "App Data Size", "App Cache Size", "Photos Size", "Videos Size", "Audio Size", "Downloads Size", "System Size", "Other Size"):
+        m = re.search(r"^%s:\s*(\d+)" % re.escape(key), ds, re.M)
+        if m and int(m.group(1)) > 0:
+            kinds.append("%s %s" % (key.replace(" Size", ""), human_kb(int(m.group(1)) // 1024)))
+    if kinds:
+        st.append("- By kind: " + ", ".join(kinds))
+    arr = {}
+    for key in ("Package Names", "App Sizes", "App Data Sizes", "Cache Sizes"):
+        m = re.search(r"^%s:\s*(\[.*\])\s*$" % re.escape(key), ds, re.M)
+        arr[key] = guard(json.loads, m.group(1)) if m else None
+    names_ = arr.get("Package Names")
+    if names_ and all(arr.get(k) and len(arr[k]) == len(names_) for k in ("App Sizes", "App Data Sizes", "Cache Sizes")):
+        rows = sorted(((to_int(a) or 0) + (to_int(d) or 0) + (to_int(c) or 0), n, to_int(d) or 0, to_int(c) or 0)
+                      for n, a, d, c in zip(names_, arr["App Sizes"], arr["App Data Sizes"], arr["Cache Sizes"]))[::-1][:15]
+        st.append("- Biggest apps (code + data + cache): " + "; ".join("%s %s (data %s, cache %s)" % (n, human_kb(t // 1024), human_kb(d // 1024), human_kb(c // 1024)) for t, n, d, c in rows))
+    folders = []
+    for line in sec.get("du-shared", "").split("\n"):
+        m = re.match(r"^(\d+)\s+/sdcard/(\S+)$", line.strip())
+        if m:
+            folders.append((int(m.group(1)), m.group(2)))
+    if folders:
+        st.append("- Shared folders: " + ", ".join("%s %s" % (n, human_kb(kb)) for kb, n in sorted(folders, reverse=True)))
+    apks = []
+    for line in sec.get("download-apks", "").split("\n"):
+        m = re.match(r"^\S+\s+\d+\s+\S+\s+\S+\s+(\d+)\s+\S+\s+\S+\s+/sdcard/Download/(.+?)\.apk\s*$", line.strip(), re.I)
+        if m:
+            apks.append((int(m.group(1)), m.group(2)))
+    if apks:
+        total_apk = sum(sz for sz, _ in apks)
+        own = [(sz, nm) for sz, nm in apks if SAFE_INSTALLER.match(nm)]
+        st.append("- Installer files (.apk) in Downloads: %d files, %s; the owner's own app builds among them: %d files, %s" % (len(apks), human_kb(total_apk // 1024), len(own), human_kb(sum(sz for sz, _ in own) // 1024)))
+        if total_apk >= 300 * 1024 * 1024:
+            flags.append("%s of installer files (.apk) sit in Downloads (%d files): usually safe to delete once the app is installed (the owner decides)." % (human_kb(total_apk // 1024), len(apks)))
+    f2 = [l.strip() for l in sec.get("f2fs", "").split("\n") if l.strip().startswith("/sys/")]
+    if f2:
+        st.append("- F2FS counters: " + "; ".join(f2[:6]))
+    em = [l.strip() for l in sec.get("emmc-health", "").split("\n") if l.strip().startswith("/sys/")]
+    if em:
+        st.append("- eMMC health: " + "; ".join(em[:8]))
+    if st:
+        lines += ["", "## What fills the storage (diskstats, folder sizes, installers)"] + st
+
     # ---- compile state
     dex = sec.get("dexopt", "")
     status = {}
@@ -313,6 +382,9 @@ def main(argv):
         print("refused: this does not look like an optimizer-report.txt (no '##### label' sections)")
         return 2
     text, counts = redact(text)
+    text, masked = mask_download_names(text)
+    if masked:
+        counts["file names"] = masked
     leak = CREDENTIALS.search(text)
     if leak:
         print("REFUSED, nothing saved: something shaped like a live credential is in the report (%s...). Remove it and run again." % leak.group(0)[:6])
