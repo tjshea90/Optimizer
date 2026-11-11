@@ -127,6 +127,13 @@ class StorageActivity : Activity() {
         }
     }
 
+    private fun copyList() {
+        val s = lastSummary ?: return
+        val clipboard = getSystemService(ClipboardManager::class.java)
+        clipboard.setPrimaryClip(ClipData.newPlainText(getString(R.string.storage_title), StorageModel.copyText(s, TOP_N)))
+        Toast.makeText(this, R.string.copied_list, Toast.LENGTH_SHORT).show()
+    }
+
     private fun openAppSettings(packageName: String) {
         try {
             startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName")))
