@@ -5,10 +5,11 @@ An Android app to optimize **RAM and processes** on one specific tablet for the 
 
 > ### Status: foundation only
 > The build, signing, release and save-everything-to-GitHub system is set up and the app is a small **device snapshot** screen (RAM, swap, heap class, low-RAM flag, CPU ABIs, with a *Copy report* button).
-> The optimizing features are **not designed yet**: what an ordinary app may do on this tablet is being researched first (`research/FEASIBILITY.md`). Nothing has been released and nothing has been run on a device yet.
+> The optimizing features are **not designed yet**: what an ordinary app may do on this tablet is being researched first (`research/FEASIBILITY.md`), together with a map of what the owner's custom Launcher and Browser own, so nothing here can interfere with them.
+> **Release [v0.1.0](https://github.com/tjshea90/Optimizer/releases/tag/v0.1.0)** (the device snapshot screen) is published. It has not been run on the tablet yet.
 
-## Install on the tablet (once a release exists)
-1. Open the [Releases](../../releases) page on the tablet and download `Optimizer-v<version>.apk`. Optional: check it against the `.sha256` file next to it.
+## Install on the tablet
+1. Open the [Releases](../../releases) page on the tablet and download `Optimizer-v<version>.apk` (latest: [v0.1.0](https://github.com/tjshea90/Optimizer/releases/tag/v0.1.0)). Optional: check it against the `.sha256` file next to it.
 2. Open the downloaded file. Android 10 asks you to allow **Install unknown apps** for the app you opened it from: allow it once, go back, tap *Install*.
 3. Updating later: install the newer APK over the old one. Every release is signed with the same certificate (`signing/README.md`), so updates install in place.
 

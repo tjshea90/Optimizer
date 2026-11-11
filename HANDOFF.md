@@ -9,7 +9,7 @@ The single entry point for a new Claude session or account. After this, in order
   the open research question (TASKS R1, `research/FEASIBILITY.md`). Do not build kill/boost features before it is answered; measure first.
 - **State:** the infrastructure is in place and proven: the save ladder (hooks commit and push after every tool call), the Gradle project (JVM tests, lint, R8 release build, pinned signing key),
   and the GitHub Actions build. The app itself is still the skeleton: a "device snapshot" screen that prints RAM, swap, heap class, low-RAM flag and ABIs, with a Copy button.
-  `CHECKPOINT.md` says where work stopped; `BUILDLOG.md` is the list of real releases (empty = nothing published yet, TASKS OWNER-6).
+  `CHECKPOINT.md` says where work stopped; `BUILDLOG.md` is the list of real releases (**v0.1.0 is published**, built by Actions run 43109636536; it has not been run on the tablet yet).
 - **Who the owner is:** runs everything from a tablet/phone and a Claude chat, wants plain-language answers and a clear "what I did / what you must do". Prefers longer sessions and more usage
   if the product gets better, but wants usage spent efficiently. Their other repos (Browser, Launcher, LinkMeter) target the same tablet and are the source of this repo's tooling.
 - **Repo:** the GitHub remote `origin` (public). The default branch is the first session branch; later sessions get their own `ccr-*` branch (section 6).
@@ -54,4 +54,5 @@ The repo is the ONLY memory: what a session pushed is safe; what it knew only in
 3. Branches: develop and push ONLY on the branch the session was assigned; never force-push; `tools/MIRROR_MAIN` is `off` (landing on `main` is the owner's call).
 
 ## 7. What waits on the owner
-The `OWNER-n` lines in TASKS.md: app name/package, whether a USB cable and `adb` are available, what "best speed" means to them, accessibility service or on-demand only, an optional private signing key, and when to publish the first release.
+The owner answered the first questions on 2026-11-11 (TASKS "Owner request 2"): name OK, a PC with a USB cable and adb is available, the goal is a snappy tablet (fast app loading, a fast Browser, no animations) without breaking or interfering with their custom Launcher, an accessibility service is acceptable if it breaks nothing,
+the public signing key is fine, and GitHub builds the releases. Still open: OWNER-7 (optional: `main` as the default branch). Everything that changes system state needs their approval of a specific, reversible plan first (TASKS G2-G4).
