@@ -7,7 +7,7 @@
 # --------------------------------
 # The naive version of this step is:
 #
-#     cp tools/session-root-hooks.json /home/user/.claude/settings.json
+#     cp tools/session-root-hooks.json <session-root>/.claude/settings.json
 #
 # That works, and it is also an unconditional overwrite of the one file a
 # user's own Claude Code settings live in — permissions, env, statusLine,
